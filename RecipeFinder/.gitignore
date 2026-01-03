@@ -1,0 +1,75 @@
+# ========================
+# Build & Output Folders
+# ========================
+bin/
+obj/
+publish/
+
+# ========================
+# User-specific files
+# ========================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ========================
+# Rider / JetBrains
+# ========================
+.idea/
+*.iml
+
+# ========================
+# Visual Studio
+# ========================
+.vs/
+*.vscode/
+*.ncrunch*
+*_ReSharper*/
+*.DotSettings.user
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+*.tlog
+
+# ========================
+# OS-specific
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# Secrets & Sensitive Data
+# ========================
+appsettings.*.json
+secrets.json
+.env
+
+# ========================
+# Test Results
+# ========================
+TestResults/
+*.trx
+
+# ========================
+# Coverage
+# ========================
+coverage/
+*.coverage
+*.coveragexml
+
+# ========================
+# Rider / Visual Studio caches
+# ========================
+*.resharper
+*.dotCover
+
+# ========================
+# Others
+# ========================
+*.vsix
+*.nupkg
+*.snk
