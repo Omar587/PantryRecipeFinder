@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RecipeFinder.Data;
 
 namespace RecipeFinder.Controllers;
 
