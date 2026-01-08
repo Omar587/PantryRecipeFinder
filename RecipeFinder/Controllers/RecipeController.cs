@@ -1,37 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using RecipeFinder.Data;
+using System.Text.Json;
+using RecipeFinder.Models;
+using RecipeFinder.Models.Enums;
 
 namespace RecipeFinder.Controllers;
 
 public class RecipeController : Controller
 {
-    private readonly AppDbContext _context;
+    private readonly List<Recipe> _recipes;
 
-    public RecipeController(AppDbContext context)
+    public RecipeController()
     {
-        _context = context;
+        // Load recipes from JSON once when the controller is created
+        var jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "recipes.json");
+        var jsonString = System.IO.File.ReadAllText(jsonPath);
+
+        var options = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+        };
+
+        _recipes = JsonSerializer.Deserialize<List<Recipe>>(jsonString, options) ?? new List<Recipe>();
     }
 
+    // GET: /Recipe
     public IActionResult Index()
     {
-        var recipes = _context.Recipes
-            .Include(r => r.Ingredients)
-            .Include(r => r.Tags)
-            .ToList();
-
-        return View(recipes);
+        return View(_recipes);
     }
 
+    // GET: /Recipe/Details/155
     public IActionResult Details(int id)
     {
-        var recipe = _context.Recipes
-            .Include(r => r.Ingredients)
-            .Include(r => r.Tags)
-            .Include(r => r.Dietary)
-            .FirstOrDefault(r => r.Id == id);
-
-        if (recipe == null) return NotFound();
+        var recipe = _recipes.FirstOrDefault(r => r.Id == id);
+        if (recipe == null)
+            return NotFound();
 
         return View(recipe);
     }

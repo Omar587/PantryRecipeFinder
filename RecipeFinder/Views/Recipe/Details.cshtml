@@ -1,0 +1,45 @@
+@model RecipeFinder.Models.Recipe
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<h1>@Model.Name</h1>
+
+<img src="@Model.ImageUrl"
+     alt="@Model.Name"
+     style="max-width:400px;" />
+
+<p>
+    <strong>Cuisine:</strong> @Model.Cuisine <br />
+    <strong>Difficulty:</strong> @Model.Difficulty <br />
+    <strong>Prep Time:</strong> @Model.PrepTime min <br />
+    <strong>Cook Time:</strong> @Model.CookTime min <br />
+    <strong>Total Time:</strong> @Model.TotalTime() min <br />
+    <strong>Servings:</strong> @Model.Servings
+</p>
+
+<p>
+    ⭐ @Model.Rating (@Model.RatingCount ratings)
+</p>
+
+<h3>Ingredients</h3>
+<ul>
+    @foreach (var ingredient in Model.Ingredients)
+    {
+        <li>
+            @ingredient.Amount @ingredient.Unit
+            @ingredient.Name
+        </li>
+    }
+</ul>
+
+<h3>Tags</h3>
+<p>
+    @foreach (var tag in Model.Tags)
+    {
+        <span class="tag">@tag.Name</span>
+    }
+</p>
+
+<a asp-action="Index">← Back to Recipes</a>
