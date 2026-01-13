@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using RecipeFinder.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,6 +18,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// Program.cs
+var connectionString = "Data Source=RecipeFinder.db";
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionString));
 
 app.UseAuthorization();
 
