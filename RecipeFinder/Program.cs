@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
+using RecipeFinder.Import;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
@@ -11,10 +13,30 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-
 var app = builder.Build();
 
 // Program.cs
+
+// ===============================
+// SEEDS DATA WITH DUMMY DATA 
+// ===============================
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+    // Ensure DB exists
+    context.Database.Migrate();
+
+    // Seed only if empty
+    if (!context.Recipes.Any())
+    {
+        await JsonLoader.LoadRecipesAsync(
+            context,
+            "Data/recipes.json"
+        );
+    }
+}
+// ===============================
 
 
 // Configure the HTTP request pipeline.
