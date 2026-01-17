@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
-using RecipeFinder.Import;
+;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,28 +15,14 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Program.cs
-
-// ===============================
-// SEEDS DATA WITH DUMMY DATA 
-// ===============================
+// Seed database
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    // Ensure DB exists
-    context.Database.Migrate();
-
-    // Seed only if empty
-    if (!context.Recipes.Any())
-    {
-        await JsonLoader.LoadRecipesAsync(
-            context,
-            "Data/recipes.json"
-        );
-    }
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>(); // Use your actual DbContext name
+    await context.Database.MigrateAsync(); // Creates database if it doesn't exist
+    await RecipeSeeder.SeedRecipes(context);
 }
-// ===============================
+
 
 
 // Configure the HTTP request pipeline.
