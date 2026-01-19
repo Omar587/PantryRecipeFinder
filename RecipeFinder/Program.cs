@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
+using RecipeFinder.Services;
+
 ;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+/*
 // Seed database
 using (var scope = app.Services.CreateScope())
 {
@@ -22,6 +25,18 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync(); // Creates database if it doesn't exist
     await RecipeSeeder.SeedRecipes(context);
 }
+*/
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>(); // Use your actual DbContext name
+    RecipeService recipeService = new RecipeService(context);
+    Console.WriteLine(recipeService.GetById(34).Name);
+    
+}
+
+
+
 
 
 
