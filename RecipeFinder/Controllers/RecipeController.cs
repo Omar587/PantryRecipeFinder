@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using RecipeFinder.Data;
 using RecipeFinder.Models;
+using RecipeFinder.Services;
 using RecipeFinder.Models.Enums;
 
 namespace RecipeFinder.Controllers;
@@ -8,26 +10,19 @@ namespace RecipeFinder.Controllers;
 public class RecipeController : Controller
 {
     private readonly List<Recipe> _recipes;
-
-    public RecipeController()
+    private readonly AppDbContext _context;
+  
+    // Add this constructor
+    public RecipeController(AppDbContext context)
     {
-        // Load recipes from JSON once when the controller is created
-        var jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "recipes.json");
-        var jsonString = System.IO.File.ReadAllText(jsonPath);
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-        };
-
-        _recipes = JsonSerializer.Deserialize<List<Recipe>>(jsonString, options) ?? new List<Recipe>();
+        _context = context;
     }
-
+    
     // GET: /Recipe
     public IActionResult Index()
     {
-        return View(_recipes);
+        RecipeService recipeService = new RecipeService(_context);
+        return View( recipeService.GetAll().Take(10));
     }
 
     // GET: /Recipe/Details/155
@@ -39,4 +34,6 @@ public class RecipeController : Controller
 
         return View(recipe);
     }
+    
+    
 }
