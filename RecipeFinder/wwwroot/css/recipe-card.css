@@ -1,0 +1,77 @@
+/* Recipe Grid Container */
+.recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    padding: 20px 0;
+    font-family: "DD-TTNorms", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* The Recipe Card */
+.recipe-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    cursor: pointer;
+    border: 1px solid #f0f0f0; /* Subtle border like modern apps */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Hover Effect */
+.recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Recipe Image */
+.recipe-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover; /* Ensures image fills space without stretching */
+    display: block;
+}
+
+/* Content Area */
+.recipe-card h3 {
+    margin: 16px 16px 4px 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #191919;
+}
+
+.recipe-card p {
+    margin: 0 16px 16px 16px;
+    font-size: 0.9rem;
+    color: #494949;
+    line-height: 1.4;
+    flex-grow: 1; /* Pushes the button to the bottom */
+}
+
+/* The Link Styled as a DoorDash Button */
+.recipe-card a {
+    display: block;
+    text-align: center;
+    margin: 0 16px 16px 16px;
+    padding: 10px;
+    background-color: #FF3008; /* DoorDash Red */
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 50px; /* Pill shape */
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.recipe-card a:hover {
+    background-color: #D92B07;
+    color: white;
+}
+
+/* Strong labels style */
+.recipe-card p strong {
+    color: #191919;
+    font-weight: 600;
+}
