@@ -1,4 +1,5 @@
 using RecipeFinder.Models;
+using RecipeFinder.Models.Enums;
 
 namespace RecipeFinder.Services;
 using Data;
@@ -44,6 +45,35 @@ public class RecipeService
             _context.Recipes.Remove(recipe);
         }
     }
+
+    public List<Recipe> FilterByCuisine(Cuisine cuisine)
+    {
+        return _context.Recipes
+            .Where(r => r.Cuisine == cuisine)
+            .ToList();
+    }
+    
+
+    public void  FilterByDietaryInfo(string dietary)
+    {
+        
+    }
+
+    public void FilterByRating(double rating)
+    {
+        
+    }
+
+    public void FilterByDifficulty(double difficulty)
+    {
+        
+    }
+
+    public void FilterByCookTime(string cookTime)
+    {
+        
+    }
+
 
     public void Save()
     {
