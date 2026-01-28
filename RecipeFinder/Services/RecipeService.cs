@@ -54,64 +54,31 @@ public class RecipeService
             .ToList();
     }
     
-    
-    //There are several options, vegan vegetarian, gluten free, diary free
-    public List<Recipe> FilterByDietaryInfo(string dietary)
-    {
-        var query = _context.Recipes
-            .Include(r => r.Dietary)
-            .AsQueryable(); // allows dynamic filtering
-
-        if (dietary.Equals("Vegetarian", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(r =>  r.Dietary.Vegetarian);
-        }
-        else if (dietary.Equals("Vegan", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(r => r.Dietary.Vegan);
-        }
-        else if (dietary.Equals("GlutenFree", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(r => r.Dietary.GlutenFree);
-        }
-        else if (dietary.Equals("DairyFree", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(r => r.Dietary.DairyFree);
-        }
-        
-
-        return query.ToList();
-    }
-
-    // Filter recipes by minimum rating
+    // Filter recipes by minimum rating (no need to include Dietary)
     public List<Recipe> FilterByRating(double rating)
     {
         var recipes = _context.Recipes
-            .Include(r => r.Dietary)   // include related Dietary info
             .Where(r => r.Rating >= rating)
             .ToList();
 
         return recipes;
     }
 
-    // Filter recipes by difficulty (Easy, Medium, Hard)
+    // Filter recipes by difficulty (no need to include Dietary)
     public List<Recipe> FilterByDifficulty(Difficulty difficulty)
     {
         var recipes = _context.Recipes
-            .Include(r => r.Dietary)
             .Where(r => r.Difficulty == difficulty)
             .ToList();
 
         return recipes;
     }
 
-    // Filter recipes by cook time
-    // cookTime parameter format examples: "<30", "30-60", ">60"
+    // Filter recipes by cook time (no need to include Dietary)
+    // cookTime parameter examples: "<30", "30-60", ">60"
     public List<Recipe> FilterByCookTime(string cookTime)
     {
-        var query = _context.Recipes
-            .Include(r => r.Dietary)
-            .AsQueryable();
+        var query = _context.Recipes.AsQueryable();
 
         if (cookTime.StartsWith("<"))
         {
@@ -140,6 +107,27 @@ public class RecipeService
             // invalid input, return empty
             return new List<Recipe>();
         }
+
+        return query.ToList();
+    }
+
+    // Filter recipes by dietary option (include Dietary only here)
+    public List<Recipe> FilterByDietaryInfo(string dietary)
+    {
+        var query = _context.Recipes
+            .Include(r => r.Dietary) // needed here
+            .AsQueryable();
+
+        if (dietary.Equals("Vegetarian", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(r => r.Dietary != null && r.Dietary.Vegetarian);
+        else if (dietary.Equals("Vegan", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(r => r.Dietary != null && r.Dietary.Vegan);
+        else if (dietary.Equals("GlutenFree", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(r => r.Dietary != null && r.Dietary.GlutenFree);
+        else if (dietary.Equals("DairyFree", StringComparison.OrdinalIgnoreCase))
+            query = query.Where(r => r.Dietary != null && r.Dietary.DairyFree);
+        else
+            return query.ToList(); // unknown dietary option, return all
 
         return query.ToList();
     }
