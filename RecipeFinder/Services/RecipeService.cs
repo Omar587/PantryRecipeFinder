@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Models;
 using RecipeFinder.Models.Enums;
 
@@ -53,27 +54,95 @@ public class RecipeService
             .ToList();
     }
     
-
-    public void  FilterByDietaryInfo(string dietary)
+    
+    //There are several options, vegan vegetarian, gluten free, diary free
+    public List<Recipe> FilterByDietaryInfo(string dietary)
     {
+        var query = _context.Recipes
+            .Include(r => r.Dietary)
+            .AsQueryable(); // allows dynamic filtering
+
+        if (dietary.Equals("Vegetarian", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(r =>  r.Dietary.Vegetarian);
+        }
+        else if (dietary.Equals("Vegan", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(r => r.Dietary.Vegan);
+        }
+        else if (dietary.Equals("GlutenFree", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(r => r.Dietary.GlutenFree);
+        }
+        else if (dietary.Equals("DairyFree", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(r => r.Dietary.DairyFree);
+        }
         
+
+        return query.ToList();
     }
 
-    public void FilterByRating(double rating)
+    // Filter recipes by minimum rating
+    public List<Recipe> FilterByRating(double rating)
     {
-        
+        var recipes = _context.Recipes
+            .Include(r => r.Dietary)   // include related Dietary info
+            .Where(r => r.Rating >= rating)
+            .ToList();
+
+        return recipes;
     }
 
-    public void FilterByDifficulty(double difficulty)
+    // Filter recipes by difficulty (Easy, Medium, Hard)
+    public List<Recipe> FilterByDifficulty(Difficulty difficulty)
     {
-        
+        var recipes = _context.Recipes
+            .Include(r => r.Dietary)
+            .Where(r => r.Difficulty == difficulty)
+            .ToList();
+
+        return recipes;
     }
 
-    public void FilterByCookTime(string cookTime)
+    // Filter recipes by cook time
+    // cookTime parameter format examples: "<30", "30-60", ">60"
+    public List<Recipe> FilterByCookTime(string cookTime)
     {
-        
-    }
+        var query = _context.Recipes
+            .Include(r => r.Dietary)
+            .AsQueryable();
 
+        if (cookTime.StartsWith("<"))
+        {
+            if (int.TryParse(cookTime.Substring(1), out int max))
+            {
+                query = query.Where(r => r.CookTime < max);
+            }
+        }
+        else if (cookTime.StartsWith(">"))
+        {
+            if (int.TryParse(cookTime.Substring(1), out int min))
+            {
+                query = query.Where(r => r.CookTime > min);
+            }
+        }
+        else if (cookTime.Contains("-"))
+        {
+            var parts = cookTime.Split('-');
+            if (int.TryParse(parts[0], out int min) && int.TryParse(parts[1], out int max))
+            {
+                query = query.Where(r => r.CookTime >= min && r.CookTime <= max);
+            }
+        }
+        else
+        {
+            // invalid input, return empty
+            return new List<Recipe>();
+        }
+
+        return query.ToList();
+    }
 
     public void Save()
     {
