@@ -1,45 +1,398 @@
 @model RecipeFinder.Models.Recipe
+@inject Microsoft.AspNetCore.Identity.SignInManager<RecipeFinder.Models.Customer> SignInManager
+@inject Microsoft.AspNetCore.Identity.UserManager<RecipeFinder.Models.Customer> UserManager
 
 @{
     ViewData["Title"] = Model.Name;
+    var userId = 0;
+    var isFavorited = false;
+    var userRating = 0;
+    
+    if (SignInManager.IsSignedIn(User))
+    {
+        var user = await UserManager.GetUserAsync(User);
+        userId = user.Id;
+        // We'll add logic to check if favorited/rated later
+    }
 }
 
-<h1>@Model.Name</h1>
-
-<img src="@Model.ImageUrl"
-     alt="@Model.Name"
-     style="max-width:400px;" />
-
-<p>
-    <strong>Cuisine:</strong> @Model.Cuisine <br />
-    <strong>Difficulty:</strong> @Model.Difficulty <br />
-    <strong>Prep Time:</strong> @Model.PrepTime min <br />
-    <strong>Cook Time:</strong> @Model.CookTime min <br />
-    <strong>Total Time:</strong> @Model.TotalTime() min <br />
-    <strong>Servings:</strong> @Model.Servings
-</p>
-
-<p>
-    ⭐ @Model.Rating (@Model.RatingCount ratings)
-</p>
-
-<h3>Ingredients</h3>
-<ul>
-    @foreach (var ingredient in Model.Ingredients)
-    {
-        <li>
-            @ingredient.Amount @ingredient.Unit
-            @ingredient.Name
-        </li>
+<style>
+    .recipe-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin: -1rem -1rem 2rem -1rem;
     }
-</ul>
-
-<h3>Tags</h3>
-<p>
-    @foreach (var tag in Model.Tags)
-    {
-        <span class="tag">@tag.Name</span>
+    
+    .recipe-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
-</p>
+    
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .info-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .info-item strong {
+        display: block;
+        font-size: 1.5rem;
+        color: #667eea;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-item span {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+    
+    .tag {
+        display: inline-block;
+        background: #e9ecef;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        margin: 0.25rem;
+        font-size: 0.875rem;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    
+    .btn-favorite {
+        flex: 1;
+    }
+    
+    .btn-favorite.favorited {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .rating-display {
+        font-size: 2rem;
+        color: #ffc107;
+    }
+    
+    .star-rating {
+        font-size: 2rem;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .star-rating span {
+        color: #ddd;
+        transition: color 0.2s;
+    }
+    
+    .star-rating span.filled {
+        color: #ffc107;
+    }
+    
+    .star-rating span:hover,
+    .star-rating span:hover ~ span {
+        color: #ffc107;
+    }
+    
+    .ingredient-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .ingredient-list li {
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+    
+    .ingredient-list li:before {
+        content: "✓";
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 1rem;
+        font-size: 1.25rem;
+    }
+    
+    .notes-section {
+        margin-top: 2rem;
+    }
+    
+    .note-card {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-top: 1rem;
+    }
+</style>
 
-<a asp-action="Index">← Back to Recipes</a>
+<div class="recipe-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-3">@Model.Name</h1>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-light text-dark">@Model.Cuisine</span>
+                    <span class="badge bg-light text-dark">@Model.Difficulty</span>
+                    <span class="rating-display">
+                        ⭐ @Model.Rating.ToString("F1") 
+                        <small style="font-size: 0.5em;">(@Model.RatingCount reviews)</small>
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <a asp-action="Index" class="btn btn-light">
+                    ← Back to Recipes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- Left Column: Image and Actions -->
+        <div class="col-lg-5">
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="recipe-image mb-3" />
+            
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="action-buttons">
+                    <button class="btn btn-outline-danger btn-favorite" id="favoriteBtn">
+                        <span id="favoriteIcon">❤️</span> 
+                        <span id="favoriteText">Add to Favorites</span>
+                    </button>
+                </div>
+                
+                <div class="info-card">
+                    <h5>Rate this recipe</h5>
+                    <div class="star-rating" id="starRating">
+                        <span data-rating="1">★</span>
+                        <span data-rating="2">★</span>
+                        <span data-rating="3">★</span>
+                        <span data-rating="4">★</span>
+                        <span data-rating="5">★</span>
+                    </div>
+                    <small class="text-muted" id="ratingMessage"></small>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <a asp-controller="Account" asp-action="Login">Log in</a> to favorite, rate, and add notes!
+                </div>
+            }
+            
+            <!-- Recipe Info -->
+            <div class="info-card">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>@Model.PrepTime</strong>
+                        <span>Prep Time</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>@Model.CookTime</strong>
+                        <span>Cook Time</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>@Model.TotalTime()</strong>
+                        <span>Total</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>@Model.Servings</strong>
+                        <span>Servings</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Ingredients and Notes -->
+        <div class="col-lg-7">
+            <div class="info-card">
+                <h3 class="mb-3">Ingredients</h3>
+                <ul class="ingredient-list">
+                    @foreach (var ingredient in Model.Ingredients)
+                    {
+                        <li>
+                            <strong>@ingredient.Amount @ingredient.Unit</strong> 
+                            @ingredient.Name
+                        </li>
+                    }
+                </ul>
+            </div>
+            
+            @if (Model.Tags.Any())
+            {
+                <div class="info-card">
+                    <h5>Tags</h5>
+                    <div>
+                        @foreach (var tag in Model.Tags)
+                        {
+                            <span class="tag">@tag.Name</span>
+                        }
+                    </div>
+                </div>
+            }
+            
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="notes-section info-card">
+                    <h5>My Notes</h5>
+                    <textarea class="form-control" id="noteText" rows="4" 
+                              placeholder="Add your personal notes about this recipe..."></textarea>
+                    <button class="btn btn-primary mt-2" id="saveNoteBtn">Save Note</button>
+                    
+                    <div id="savedNote" class="note-card" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <p id="noteContent" class="mb-0"></p>
+                            <button class="btn btn-sm btn-link" id="editNoteBtn">Edit</button>
+                        </div>
+                        <small class="text-muted" id="noteDate"></small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (SignInManager.IsSignedIn(User))
+{
+    @section Scripts {
+        <script>
+            const recipeId = @Model.Id;
+            const userId = @userId;
+            
+            // Star Rating
+            const stars = document.querySelectorAll('.star-rating span');
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = this.dataset.rating;
+                    submitRating(rating);
+                });
+                
+                star.addEventListener('mouseenter', function() {
+                    const rating = this.dataset.rating;
+                    highlightStars(rating);
+                });
+            });
+            
+            document.querySelector('.star-rating').addEventListener('mouseleave', function() {
+                // Reset to actual rating
+                highlightStars(0); // We'll load actual rating later
+            });
+            
+            function highlightStars(rating) {
+                stars.forEach((star, index) => {
+                    if (index < rating) {
+                        star.classList.add('filled');
+                    } else {
+                        star.classList.remove('filled');
+                    }
+                });
+            }
+            
+            async function submitRating(rating) {
+                try {
+                    const response = await fetch('/Recipe/RateRecipe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ recipeId, rating })
+                    });
+                    
+                    if (response.ok) {
+                        highlightStars(rating);
+                        document.getElementById('ratingMessage').textContent = 'Thanks for rating!';
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+            
+            // Favorite Button
+            document.getElementById('favoriteBtn').addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/Recipe/ToggleFavorite', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ recipeId })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.isFavorited) {
+                        this.classList.add('favorited');
+                        document.getElementById('favoriteText').textContent = 'Remove from Favorites';
+                    } else {
+                        this.classList.remove('favorited');
+                        document.getElementById('favoriteText').textContent = 'Add to Favorites';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+            
+            // Save Note
+            document.getElementById('saveNoteBtn').addEventListener('click', async function() {
+                const noteText = document.getElementById('noteText').value;
+                if (!noteText.trim()) return;
+                
+                try {
+                    const response = await fetch('/Recipe/SaveNote', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ recipeId, noteText })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        showSavedNote(noteText, data.createdAt);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+            
+            function showSavedNote(text, date) {
+                document.getElementById('noteText').style.display = 'none';
+                document.getElementById('saveNoteBtn').style.display = 'none';
+                document.getElementById('savedNote').style.display = 'block';
+                document.getElementById('noteContent').textContent = text;
+                document.getElementById('noteDate').textContent = 'Saved on ' + new Date(date).toLocaleDateString();
+            }
+            
+            document.getElementById('editNoteBtn').addEventListener('click', function() {
+                document.getElementById('noteText').style.display = 'block';
+                document.getElementById('saveNoteBtn').style.display = 'block';
+                document.getElementById('savedNote').style.display = 'none';
+            });
+        </script>
+    }
+}
