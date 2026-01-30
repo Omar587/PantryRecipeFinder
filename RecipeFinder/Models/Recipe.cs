@@ -27,4 +27,9 @@ public class Recipe
 
     // Domain logic belongs here
     public int TotalTime() => PrepTime + CookTime;
+    
+    // Add these navigation properties
+    public List<FavoriteRecipe> FavoritedBy { get; set; } = new();
+    public List<RecipeRating> Ratings { get; set; } = new();
+    public List<RecipeNote> Notes { get; set; } = new();
 }
