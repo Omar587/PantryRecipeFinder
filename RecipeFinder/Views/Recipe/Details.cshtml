@@ -12,249 +12,535 @@
     {
         var user = await UserManager.GetUserAsync(User);
         userId = user.Id;
-        // We'll add logic to check if favorited/rated later
     }
 }
 
 <style>
-    .recipe-header {
-        background: linear-gradient(135deg, #2C3E50 0%, #3498db 100%);
-        color: white;
-        padding: 3rem 0;
-        margin: -1rem -1rem 2rem -1rem;
-        border-radius: 0 0 32px 32px; /* More rounded */
-        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+    body {
+        background: #FFF8F0;
     }
     
-    .recipe-image {
+    .recipe-hero {
+        position: relative;
+        height: 60vh;
+        min-height: 400px;
+        overflow: hidden;
+        border-radius: 0 0 40px 40px;
+        margin: -1rem -1rem 3rem -1rem;
+    }
+    
+    .recipe-hero-image {
         width: 100%;
-        max-height: 400px;
+        height: 100%;
         object-fit: cover;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        filter: brightness(0.7);
     }
     
-    .info-card {
+    .recipe-hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(62, 39, 35, 0.95), transparent);
+        padding: 3rem 0 2rem;
+        color: white;
+    }
+    
+    .recipe-title {
+        font-family: 'Georgia', serif;
+        font-size: 3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .recipe-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .badge-warm {
+        background: #E67E22;
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 25px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+    }
+    
+    .rating-badge {
+        background: rgba(255, 255, 255, 0.95);
+        color: #3E2723;
+        padding: 0.5rem 1.25rem;
+        border-radius: 25px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .rating-star {
+        color: #F39C12;
+        font-size: 1.2rem;
+    }
+    
+    .back-button {
+        position: absolute;
+        top: 2rem;
+        left: 2rem;
+        background: rgba(255, 255, 255, 0.95);
+        color: #3E2723;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.1);
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+    
+    .back-button:hover {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(139, 69, 19, 0.1);
+        color: #E67E22;
     }
     
-    .info-grid {
+    .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .recipe-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-top: 1rem;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 2.5rem;
+        margin-bottom: 3rem;
     }
     
-    .info-item {
+    .card-warm {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .card-warm:hover {
+        transform: translateY(-4px);
+    }
+    
+    .section-title {
+        font-family: 'Georgia', serif;
+        color: #3E2723;
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title::before {
+        content: '';
+        width: 4px;
+        height: 2rem;
+        background: #E67E22;
+        border-radius: 2px;
+    }
+    
+    .quick-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, #F5E6D3 0%, #FFF8F0 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
         text-align: center;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
+        border: 2px solid rgba(230, 126, 34, 0.1);
     }
     
-    .info-item strong {
+    .info-box-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #E67E22;
         display: block;
-        font-size: 1.5rem;
-        color: #667eea;
         margin-bottom: 0.25rem;
     }
     
-    .info-item span {
-        color: #6c757d;
-        font-size: 0.875rem;
+    .info-box-label {
+        color: #8B4513;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
-    .tag {
-        display: inline-block;
-        background: #e9ecef;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        margin: 0.25rem;
-        font-size: 0.875rem;
-    }
-    
-    .action-buttons {
+    .action-section {
         display: flex;
-        gap: 1rem;
-        margin: 1.5rem 0;
+        flex-direction: column;
+        gap: 1.5rem;
     }
     
-    .btn-favorite {
-        flex: 1;
+    .favorite-button {
+        background: linear-gradient(135deg, #E67E22 0%, #D4845F 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
     }
     
-    .btn-favorite.favorited {
-        background: #dc3545;
-        border-color: #dc3545;
+    .favorite-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
     }
     
-    .rating-display {
-        font-size: 2rem;
-        color: #ffc107;
+    .favorite-button.favorited {
+        background: linear-gradient(135deg, #C0392B 0%, #E74C3C 100%);
+    }
+    
+    .rating-section {
+        background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 2px solid rgba(230, 126, 34, 0.15);
+    }
+    
+    .rating-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #3E2723;
+        margin-bottom: 1rem;
+        text-align: center;
     }
     
     .star-rating {
-        font-size: 2rem;
-        cursor: pointer;
-        user-select: none;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
     }
     
     .star-rating span {
-        color: #ddd;
-        transition: color 0.2s;
-    }
-    
-    .star-rating span.filled {
-        color: #ffc107;
+        color: #E0E0E0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
     
     .star-rating span:hover,
-    .star-rating span:hover ~ span {
-        color: #ffc107;
+    .star-rating span.filled {
+        color: #F39C12;
+        transform: scale(1.1);
     }
     
-    .ingredient-list {
-        list-style: none;
-        padding: 0;
+    .rating-message {
+        text-align: center;
+        color: #8B4513;
+        font-size: 0.9rem;
+        min-height: 1.5rem;
     }
     
-    .ingredient-list li {
-        padding: 0.75rem;
-        border-bottom: 1px solid #e9ecef;
+    .login-prompt {
+        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border-left: 4px solid #4CAF50;
+        color: #2E7D32;
+        margin-bottom: 1.5rem;
+    }
+    
+    .login-prompt a {
+        color: #1B5E20;
+        font-weight: 600;
+        text-decoration: underline;
+    }
+    
+    .ingredient-item {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        padding: 1rem 0;
+        border-bottom: 1px solid #F5E6D3;
+        gap: 1rem;
     }
     
-    .ingredient-list li:before {
-        content: "✓";
-        color: #28a745;
-        font-weight: bold;
-        margin-right: 1rem;
-        font-size: 1.25rem;
+    .ingredient-item:last-child {
+        border-bottom: none;
     }
     
-    .notes-section {
+    .ingredient-check {
+        color: #E67E22;
+        font-size: 1.5rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+    
+    .ingredient-content {
+        flex: 1;
+    }
+    
+    .ingredient-amount {
+        color: #E67E22;
+        font-weight: 700;
+        margin-right: 0.5rem;
+    }
+    
+    .ingredient-name {
+        color: #3E2723;
+    }
+    
+    .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .tag-item {
+        background: linear-gradient(135deg, #F5E6D3 0%, #FFF8F0 100%);
+        color: #8B4513;
+        padding: 0.5rem 1.25rem;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid rgba(230, 126, 34, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    .tag-item:hover {
+        background: #E67E22;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .notes-container {
+        background: #FFFBEA;
+        padding: 2rem;
+        border-radius: 16px;
+        border-left: 4px solid #F39C12;
         margin-top: 2rem;
     }
     
-    .note-card {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
+    .notes-textarea {
+        width: 100%;
+        border: 2px solid #F5E6D3;
+        border-radius: 12px;
         padding: 1rem;
-        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+        resize: vertical;
+        transition: border-color 0.3s ease;
+        background: white;
+    }
+    
+    .notes-textarea:focus {
+        outline: none;
+        border-color: #E67E22;
+        box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+    }
+    
+    .save-note-button {
+        background: #E67E22;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: pointer;
         margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .save-note-button:hover {
+        background: #8B4513;
+        transform: translateY(-2px);
+    }
+    
+    .saved-note-display {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 1rem;
+        border: 2px dashed #F39C12;
+    }
+    
+    .note-text {
+        color: #3E2723;
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .note-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #8B4513;
+    }
+    
+    .edit-note-button {
+        background: none;
+        border: none;
+        color: #E67E22;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+        padding: 0;
+    }
+    
+    .edit-note-button:hover {
+        color: #8B4513;
+    }
+    
+    /* Responsive Design */
+    @@media (max-width: 968px) {
+        .recipe-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .recipe-title {
+            font-size: 2rem;
+        }
+        
+        .quick-info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .quick-info-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .back-button {
+            top: 1rem;
+            left: 1rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
     }
 </style>
 
-
-
-<div class="recipe-header">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-4 mb-3">@Model.Name</h1>
-                <div class="d-flex align-items-center gap-3">
-                    <span class="badge bg-light text-dark">@Model.Cuisine</span>
-                    <span class="badge bg-light text-dark">@Model.Difficulty</span>
-                    <span class="rating-display">
-                        ⭐ @Model.Rating.ToString("F1") 
-                        <small style="font-size: 0.5em;">(@Model.RatingCount reviews)</small>
-                    </span>
+<div class="recipe-hero">
+    <img src="@Model.ImageUrl" alt="@Model.Name" class="recipe-hero-image" />
+    <a asp-action="Index" class="back-button">← Back to Recipes</a>
+    
+    <div class="recipe-hero-overlay">
+        <div class="container">
+            <h1 class="recipe-title">@Model.Name</h1>
+            <div class="recipe-meta">
+                <span class="badge-warm">@Model.Cuisine</span>
+                <span class="badge-warm">@Model.Difficulty</span>
+                <div class="rating-badge">
+                    <span class="rating-star">★</span>
+                    <span>@Model.Rating.ToString("F1")</span>
+                    <small style="opacity: 0.7;">(@Model.RatingCount)</small>
                 </div>
-            </div>
-            <div class="col-md-4 text-end">
-                <a asp-action="Index" class="btn btn-light">
-                    ← Back to Recipes
-                </a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="row">
-        <!-- Left Column: Image and Actions -->
-        <div class="col-lg-5">
-            <img src="@Model.ImageUrl" alt="@Model.Name" class="recipe-image mb-3" />
-            
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <div class="action-buttons">
-                    <button class="btn btn-outline-danger btn-favorite" id="favoriteBtn">
-                        <span id="favoriteIcon">❤️</span> 
-                        <span id="favoriteText">Add to Favorites</span>
-                    </button>
+<div class="content-wrapper">
+    <div class="recipe-grid">
+        <!-- Sidebar: Quick Info & Actions -->
+        <aside>
+            <div class="card-warm">
+                <h3 class="section-title">Quick Info</h3>
+                <div class="quick-info-grid">
+                    <div class="info-box">
+                        <span class="info-box-value">@Model.PrepTime</span>
+                        <span class="info-box-label">Prep Time</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-box-value">@Model.CookTime</span>
+                        <span class="info-box-label">Cook Time</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-box-value">@Model.TotalTime()</span>
+                        <span class="info-box-label">Total</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="info-box-value">@Model.Servings</span>
+                        <span class="info-box-label">Servings</span>
+                    </div>
                 </div>
                 
-                <div class="info-card">
-                    <h5>Rate this recipe</h5>
-                    <div class="star-rating" id="starRating">
-                        <span data-rating="1">★</span>
-                        <span data-rating="2">★</span>
-                        <span data-rating="3">★</span>
-                        <span data-rating="4">★</span>
-                        <span data-rating="5">★</span>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <div class="action-section">
+                        <button class="favorite-button" id="favoriteBtn">
+                            <span id="favoriteIcon">♥</span>
+                            <span id="favoriteText">Add to Favorites</span>
+                        </button>
+                        
+                        <div class="rating-section">
+                            <div class="rating-title">Rate This Recipe</div>
+                            <div class="star-rating" id="starRating">
+                                <span data-rating="1">★</span>
+                                <span data-rating="2">★</span>
+                                <span data-rating="3">★</span>
+                                <span data-rating="4">★</span>
+                                <span data-rating="5">★</span>
+                            </div>
+                            <div class="rating-message" id="ratingMessage"></div>
+                        </div>
                     </div>
-                    <small class="text-muted" id="ratingMessage"></small>
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info">
-                    <a asp-controller="Account" asp-action="Login">Log in</a> to favorite, rate, and add notes!
-                </div>
-            }
-            
-            <!-- Recipe Info -->
-            <div class="info-card">
-                <div class="info-grid">
-                    <div class="info-item">
-                        <strong>@Model.PrepTime</strong>
-                        <span>Prep Time</span>
+                }
+                else
+                {
+                    <div class="login-prompt">
+                        <strong>Join the community!</strong><br>
+                        <a asp-controller="Account" asp-action="Login">Log in</a> to save favorites, rate recipes, and add personal notes.
                     </div>
-                    <div class="info-item">
-                        <strong>@Model.CookTime</strong>
-                        <span>Cook Time</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>@Model.TotalTime()</strong>
-                        <span>Total</span>
-                    </div>
-                    <div class="info-item">
-                        <strong>@Model.Servings</strong>
-                        <span>Servings</span>
-                    </div>
-                </div>
+                }
             </div>
-        </div>
+        </aside>
         
-        <!-- Right Column: Ingredients and Notes -->
-        <div class="col-lg-7">
-            <div class="info-card">
-                <h3 class="mb-3">Ingredients</h3>
-                <ul class="ingredient-list">
+        <!-- Main Content: Ingredients & Tags -->
+        <main>
+            <div class="card-warm">
+                <h2 class="section-title">Ingredients</h2>
+                <div>
                     @foreach (var ingredient in Model.Ingredients)
                     {
-                        <li>
-                            <strong>@ingredient.Amount @ingredient.Unit</strong> 
-                            @ingredient.Name
-                        </li>
+                        <div class="ingredient-item">
+                            <span class="ingredient-check">✓</span>
+                            <div class="ingredient-content">
+                                <span class="ingredient-amount">@ingredient.Amount @ingredient.Unit</span>
+                                <span class="ingredient-name">@ingredient.Name</span>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             </div>
             
             @if (Model.Tags.Any())
             {
-                <div class="info-card">
-                    <h5>Tags</h5>
-                    <div>
+                <div class="card-warm" style="margin-top: 2rem;">
+                    <h3 class="section-title">Tags</h3>
+                    <div class="tag-container">
                         @foreach (var tag in Model.Tags)
                         {
-                            <span class="tag">@tag.Name</span>
+                            <span class="tag-item">#@tag.Name</span>
                         }
                     </div>
                 </div>
@@ -262,22 +548,22 @@
             
             @if (SignInManager.IsSignedIn(User))
             {
-                <div class="notes-section info-card">
-                    <h5>My Notes</h5>
-                    <textarea class="form-control" id="noteText" rows="4" 
-                              placeholder="Add your personal notes about this recipe..."></textarea>
-                    <button class="btn btn-primary mt-2" id="saveNoteBtn">Save Note</button>
+                <div class="notes-container">
+                    <h3 class="section-title">My Personal Notes</h3>
+                    <textarea class="notes-textarea" id="noteText" rows="5" 
+                              placeholder="Add your thoughts, modifications, or tips for this recipe..."></textarea>
+                    <button class="save-note-button" id="saveNoteBtn">Save Note</button>
                     
-                    <div id="savedNote" class="note-card" style="display: none;">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <p id="noteContent" class="mb-0"></p>
-                            <button class="btn btn-sm btn-link" id="editNoteBtn">Edit</button>
+                    <div id="savedNote" class="saved-note-display" style="display: none;">
+                        <p class="note-text" id="noteContent"></p>
+                        <div class="note-footer">
+                            <small id="noteDate"></small>
+                            <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
                         </div>
-                        <small class="text-muted" id="noteDate"></small>
                     </div>
                 </div>
             }
-        </div>
+        </main>
     </div>
 </div>
 
@@ -288,23 +574,24 @@
             const recipeId = @Model.Id;
             const userId = @userId;
             
-            // Star Rating
+            // Star Rating System
             const stars = document.querySelectorAll('.star-rating span');
+            const ratingMessage = document.getElementById('ratingMessage');
+            
             stars.forEach(star => {
                 star.addEventListener('click', function() {
-                    const rating = this.dataset.rating;
+                    const rating = parseInt(this.dataset.rating);
                     submitRating(rating);
                 });
                 
                 star.addEventListener('mouseenter', function() {
-                    const rating = this.dataset.rating;
+                    const rating = parseInt(this.dataset.rating);
                     highlightStars(rating);
                 });
             });
             
             document.querySelector('.star-rating').addEventListener('mouseleave', function() {
-                // Reset to actual rating
-                highlightStars(0); // We'll load actual rating later
+                highlightStars(0);
             });
             
             function highlightStars(rating) {
@@ -329,16 +616,21 @@
                     
                     if (response.ok) {
                         highlightStars(rating);
-                        document.getElementById('ratingMessage').textContent = 'Thanks for rating!';
-                        setTimeout(() => location.reload(), 1000);
+                        ratingMessage.textContent = '✓ Thank you for your rating!';
+                        setTimeout(() => location.reload(), 1500);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error submitting rating:', error);
+                    ratingMessage.textContent = 'Failed to save rating. Please try again.';
                 }
             }
             
-            // Favorite Button
-            document.getElementById('favoriteBtn').addEventListener('click', async function() {
+            // Favorite Toggle
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            const favoriteIcon = document.getElementById('favoriteIcon');
+            const favoriteText = document.getElementById('favoriteText');
+            
+            favoriteBtn.addEventListener('click', async function() {
                 try {
                     const response = await fetch('/Recipe/ToggleFavorite', {
                         method: 'POST',
@@ -350,21 +642,33 @@
                     
                     const data = await response.json();
                     if (data.isFavorited) {
-                        this.classList.add('favorited');
-                        document.getElementById('favoriteText').textContent = 'Remove from Favorites';
+                        favoriteBtn.classList.add('favorited');
+                        favoriteText.textContent = 'Saved to Favorites';
+                        favoriteIcon.textContent = '♥';
                     } else {
-                        this.classList.remove('favorited');
-                        document.getElementById('favoriteText').textContent = 'Add to Favorites';
+                        favoriteBtn.classList.remove('favorited');
+                        favoriteText.textContent = 'Add to Favorites';
+                        favoriteIcon.textContent = '♥';
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error toggling favorite:', error);
                 }
             });
             
-            // Save Note
-            document.getElementById('saveNoteBtn').addEventListener('click', async function() {
-                const noteText = document.getElementById('noteText').value;
-                if (!noteText.trim()) return;
+            // Notes System
+            const noteText = document.getElementById('noteText');
+            const saveNoteBtn = document.getElementById('saveNoteBtn');
+            const savedNote = document.getElementById('savedNote');
+            const noteContent = document.getElementById('noteContent');
+            const noteDate = document.getElementById('noteDate');
+            const editNoteBtn = document.getElementById('editNoteBtn');
+            
+            saveNoteBtn.addEventListener('click', async function() {
+                const text = noteText.value.trim();
+                if (!text) {
+                    alert('Please write a note before saving.');
+                    return;
+                }
                 
                 try {
                     const response = await fetch('/Recipe/SaveNote', {
@@ -372,30 +676,35 @@
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ recipeId, noteText })
+                        body: JSON.stringify({ recipeId, noteText: text })
                     });
                     
                     if (response.ok) {
                         const data = await response.json();
-                        showSavedNote(noteText, data.createdAt);
+                        showSavedNote(text, data.createdAt);
                     }
                 } catch (error) {
-                    console.error('Error:', error);
+                    console.error('Error saving note:', error);
                 }
             });
             
             function showSavedNote(text, date) {
-                document.getElementById('noteText').style.display = 'none';
-                document.getElementById('saveNoteBtn').style.display = 'none';
-                document.getElementById('savedNote').style.display = 'block';
-                document.getElementById('noteContent').textContent = text;
-                document.getElementById('noteDate').textContent = 'Saved on ' + new Date(date).toLocaleDateString();
+                noteText.style.display = 'none';
+                saveNoteBtn.style.display = 'none';
+                savedNote.style.display = 'block';
+                noteContent.textContent = text;
+                noteDate.textContent = 'Saved on ' + new Date(date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
             }
             
-            document.getElementById('editNoteBtn').addEventListener('click', function() {
-                document.getElementById('noteText').style.display = 'block';
-                document.getElementById('saveNoteBtn').style.display = 'block';
-                document.getElementById('savedNote').style.display = 'none';
+            editNoteBtn.addEventListener('click', function() {
+                noteText.style.display = 'block';
+                saveNoteBtn.style.display = 'block';
+                savedNote.style.display = 'none';
+                noteText.focus();
             });
         </script>
     }
