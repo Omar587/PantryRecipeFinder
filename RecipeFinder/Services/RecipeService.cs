@@ -132,6 +132,15 @@ public class RecipeService
         return query.ToList();
     }
 
+    public void TestIngridents()
+    {
+
+        var query = _context.Ingredients;
+        Console.WriteLine(query.Where( id => id.Id == 1));
+        
+
+    }
+
     public void Save()
     {
         _context.SaveChanges();
