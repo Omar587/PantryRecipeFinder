@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
 using RecipeFinder.Models;
 using RecipeFinder.Services;
@@ -86,13 +87,22 @@ public class RecipeController : Controller
     }
 
     // GET: /Recipe/Details/155
+   
+    
+    
     public IActionResult Details(int id)
     {
-        RecipeService recipeService = new RecipeService(_context);
-        var recipe = recipeService.GetById(id);
+        var recipe = _context.Recipes
+            .Include(r => r.Ingredients)
+            .Include(r => r.Tags)
+            .Include(r => r.Ratings)
+            .Include(r => r.Notes)
+            .FirstOrDefault(r => r.Id == id);
+
         if (recipe == null)
             return NotFound();
 
         return View(recipe);
     }
+
 }

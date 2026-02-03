@@ -136,7 +136,7 @@ public class RecipeService
     {
 
         var query = _context.Ingredients;
-        Console.WriteLine(query.Where( id => id.Id == 1));
+        Console.WriteLine(query.Where( id => id.RecipeId == 1));
         
 
     }
