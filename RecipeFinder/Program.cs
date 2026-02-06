@@ -50,7 +50,14 @@ using (var scope = app.Services.CreateScope())
 }
 */
 
-
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    RecipeService recipeService = new RecipeService(context);
+    Console.WriteLine(recipeService.GetById(34).Name);
+    
+    recipeService.TestIngridents();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

@@ -18,6 +18,7 @@ public class AppDbContext : IdentityDbContext<Customer, IdentityRole<int>, int>
     public DbSet<FavoriteRecipe> FavoriteRecipes { get; set; }
     public DbSet<RecipeRating> RecipeRatings { get; set; }
     public DbSet<RecipeNote> RecipeNotes { get; set; }
+    public DbSet<RecipeInstructions> RecipeInstructions { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
