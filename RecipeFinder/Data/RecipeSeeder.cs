@@ -1,10 +1,17 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using CsvHelper;
 using RecipeFinder.Models;
 using RecipeFinder.Models.Enums;
 
 namespace RecipeFinder.Data;
 
+/*
+ *All parts of the code within this class is just a means of populating
+ * the database with mock data
+ * 
+ */
 public class RecipeSeeder
 {
     public static async Task SeedRecipes(AppDbContext context)
@@ -70,6 +77,48 @@ public class RecipeSeeder
         // Handle special cases for enum mapping
         var normalized = value.Replace(" ", "").Replace("-", "");
         return Enum.Parse<T>(normalized, ignoreCase: true);
+    }
+    
+    public void SeedInstructions(AppDbContext context)
+    {
+        bool instructionsExist = context.RecipeInstructions.Any();
+            
+        if (instructionsExist)
+        {
+            return;
+        }
+
+        string filePath = "Data/instructions.csv";
+
+        StreamReader fileReader = new StreamReader(filePath);
+        CsvReader csvReader = new CsvReader(fileReader, CultureInfo.InvariantCulture);
+
+        csvReader.Read();
+        csvReader.ReadHeader();
+
+        List<RecipeInstructions> instructionsList = new List<RecipeInstructions>();
+
+        while (csvReader.Read())
+        {
+            int instructionId = csvReader.GetField<int>(0);
+            int recipeId = csvReader.GetField<int>(1);
+            int stepNumber = csvReader.GetField<int>(2);
+            string instructionText = csvReader.GetField<string>(3);
+
+            RecipeInstructions newInstruction = new RecipeInstructions();
+            newInstruction.Id = instructionId;
+            newInstruction.RecipeId = recipeId;
+            newInstruction.StepNumber = stepNumber;
+            newInstruction.Instruction = instructionText;
+
+            instructionsList.Add(newInstruction);
+        }
+
+        csvReader.Dispose();
+        fileReader.Dispose();
+
+        context.RecipeInstructions.AddRange(instructionsList);
+        context.SaveChanges();
     }
 }
 
