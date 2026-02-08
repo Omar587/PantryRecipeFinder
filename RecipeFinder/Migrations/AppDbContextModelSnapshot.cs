@@ -344,6 +344,27 @@ namespace RecipeFinder.Migrations
                     b.ToTable("Recipes");
                 });
 
+            modelBuilder.Entity("RecipeFinder.Models.RecipeInstructions", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Instruction")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RecipeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StepNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RecipeInstructions");
+                });
+
             modelBuilder.Entity("RecipeFinder.Models.RecipeNote", b =>
                 {
                     b.Property<int>("Id")
