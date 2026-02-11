@@ -41,7 +41,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-
+/*
 // Seed database
 using (var scope = app.Services.CreateScope())
 {
@@ -49,6 +49,7 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
     await RecipeSeeder.SeedRecipes(context);
 }
+*/
 
 
 using (var scope = app.Services.CreateScope())
@@ -61,7 +62,7 @@ using (var scope = app.Services.CreateScope())
     
     DatabaseHelper dbHelper = new DatabaseHelper(context);
     String oldString = "https://images.unsplash.com/photo-1529563271333-8c0c59fc8c5e";
-    dbHelper.UpdateRecipeImage(2, "https://images.unsplash.com/photo-1733243326816-cdd01d071f3b");
+    dbHelper.UpdateRecipeImage(13, "https://images.unsplash.com/photo-1706711053549-f52f73a8960c");
 
 }
 
