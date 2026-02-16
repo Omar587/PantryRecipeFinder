@@ -7,13 +7,19 @@
     var userId = 0;
     var isFavorited = false;
     var userRating = 0;
+    RecipeNote userNote = null;
     
     if (SignInManager.IsSignedIn(User))
     {
         var user = await UserManager.GetUserAsync(User);
         userId = user.Id;
+        
+        // Get the current user's note for this recipe
+        userNote = Model.Notes?.FirstOrDefault(n => n.CustomerId == userId);
     }
 }
+
+
 
 <style>
     body {
@@ -566,17 +572,38 @@
             {
                 <div class="notes-container">
                     <h3 class="section-title">My Personal Notes</h3>
-                    <textarea class="notes-textarea" id="noteText" rows="5" 
-                              placeholder="Add your thoughts, modifications, or tips for this recipe..."></textarea>
-                    <button class="save-note-button" id="saveNoteBtn">Save Note</button>
-                    
-                    <div id="savedNote" class="saved-note-display" style="display: none;">
-                        <p class="note-text" id="noteContent"></p>
-                        <div class="note-footer">
-                            <small id="noteDate"></small>
-                            <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
+        
+                    @if (userNote != null)
+                    {
+                        <div id="savedNote" class="saved-note-display">
+                            <p class="note-text" id="noteContent">@userNote.NoteText</p>
+                            <div class="note-footer">
+                                <small id="noteDate">
+                                    Saved on @((userNote.UpdatedAt ?? userNote.CreatedAt).ToLocalTime().ToString("MMMM dd, yyyy"))
+                                </small>
+                                <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
+                            </div>
                         </div>
-                    </div>
+            
+                        <textarea class="notes-textarea" id="noteText" rows="5" 
+                      style="display: none;"
+                      placeholder="Add your thoughts, modifications, or tips for this recipe...">@userNote.NoteText</textarea>
+                        <button class="save-note-button" id="saveNoteBtn" style="display: none;">Save Note</button>
+                    }
+                    else
+                    {
+                        <textarea class="notes-textarea" id="noteText" rows="5" 
+                      placeholder="Add your thoughts, modifications, or tips for this recipe..."></textarea>
+                        <button class="save-note-button" id="saveNoteBtn">Save Note</button>
+            
+                        <div id="savedNote" class="saved-note-display" style="display: none;">
+                            <p class="note-text" id="noteContent"></p>
+                            <div class="note-footer">
+                                <small id="noteDate"></small>
+                                <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </main>

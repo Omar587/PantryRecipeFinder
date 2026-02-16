@@ -5,16 +5,20 @@ using RecipeFinder.Data;
 using RecipeFinder.Models;
 using RecipeFinder.Services;
 using RecipeFinder.Models.Enums;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace RecipeFinder.Controllers;
 
 public class RecipeController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly UserManager<Customer> _userManager;
   
-    public RecipeController(AppDbContext context)
+    public RecipeController(AppDbContext context, UserManager<Customer> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
     
     // GET: /Recipe
@@ -104,5 +108,58 @@ public class RecipeController : Controller
 
         return View(recipe);
     }
+    
+    
+    
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> SaveNote([FromBody] SaveNoteRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        // Check if note already exists
+        var existingNote = await _context.RecipeNotes
+            .FirstOrDefaultAsync(n => n.CustomerId == user.Id && n.RecipeId == request.RecipeId);
+
+        if (existingNote != null)
+        {
+            // Update existing note
+            existingNote.NoteText = request.NoteText;
+            existingNote.UpdatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            // Create new note
+            var newNote = new RecipeNote
+            {
+                CustomerId = user.Id,
+                RecipeId = request.RecipeId,
+                NoteText = request.NoteText,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.RecipeNotes.Add(newNote);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Json(new { 
+            success = true, 
+            createdAt = existingNote?.UpdatedAt ?? DateTime.UtcNow 
+        });
+    }
+
+// Request model
+    public class SaveNoteRequest
+    {
+        public int RecipeId { get; set; }
+        public string NoteText { get; set; }
+    }
+    
+    
+    
 
 }
