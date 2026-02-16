@@ -160,6 +160,32 @@ public class RecipeController : Controller
     }
     
     
-    
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> DeleteNote([FromBody] DeleteNoteRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        var note = await _context.RecipeNotes
+            .FirstOrDefaultAsync(n => n.CustomerId == user.Id && n.RecipeId == request.RecipeId);
+
+        if (note != null)
+        {
+            _context.RecipeNotes.Remove(note);
+            await _context.SaveChangesAsync();
+        }
+
+        return Json(new { success = true });
+    }
+
+// Request model
+    public class DeleteNoteRequest
+    {
+        public int RecipeId { get; set; }
+    }
 
 }
