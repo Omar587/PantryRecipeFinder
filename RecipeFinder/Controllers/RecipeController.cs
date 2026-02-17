@@ -181,11 +181,111 @@ public class RecipeController : Controller
 
         return Json(new { success = true });
     }
+    
 
 // Request model
     public class DeleteNoteRequest
     {
         public int RecipeId { get; set; }
     }
+    
+    
+    // POST: /Recipe/RateRecipe
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> RateRecipe([FromBody] RateRecipeRequest request)
+    {
+        if (request.Rating < 1 || request.Rating > 5)
+            return BadRequest(new { error = "Rating must be between 1 and 5." });
+
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return Unauthorized();
+
+        // get the user's rating
+        var existingRating = await _context.RecipeRatings
+            .FirstOrDefaultAsync(r => r.CustomerId == user.Id && r.RecipeId == request.RecipeId);
+
+        if (existingRating != null)
+        {
+            existingRating.Rating = request.Rating;
+            existingRating.RatedAt = DateTime.UtcNow;
+        }
+        else
+        {
+            _context.RecipeRatings.Add(new RecipeRating
+            {
+                CustomerId = user.Id,
+                RecipeId = request.RecipeId,
+                Rating = request.Rating,
+                RatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _context.SaveChangesAsync();
+
+        // Recalculate the recipe's aggregate rating
+        var allRatings = await _context.RecipeRatings
+            .Where(r => r.RecipeId == request.RecipeId)
+            .ToListAsync();
+
+        var recipe = await _context.Recipes.FindAsync(request.RecipeId);
+        if (recipe != null)
+        {
+            recipe.RatingCount = allRatings.Count;
+            recipe.Rating = allRatings.Average(r => r.Rating);
+            await _context.SaveChangesAsync();
+        }
+
+        return Json(new
+        {
+            success = true,
+            newRating = recipe?.Rating ?? 0,
+            newRatingCount = recipe?.RatingCount ?? 0,
+            userRating = request.Rating
+        });
+    }
+    
+    public class RateRecipeRequest
+    {
+        public int RecipeId { get; set; }
+        public int Rating { get; set; }
+    }
+    
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> RemoveRating([FromBody] RemoveRatingRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        var recipe = await _context.Recipes.FindAsync(request.RecipeId);
+        if (recipe == null) return NotFound();
+
+        var existingRating = await _context.RecipeRatings
+            .FirstOrDefaultAsync(r => r.CustomerId == user.Id && r.RecipeId == request.RecipeId);
+
+        if (existingRating != null)
+        {
+            if (recipe.RatingCount > 1)
+            {
+                recipe.Rating = ((recipe.Rating * recipe.RatingCount) - existingRating.Rating) / (recipe.RatingCount - 1);
+                recipe.RatingCount--;
+            }
+            else
+            {
+                recipe.Rating = 0;
+                recipe.RatingCount = 0;
+            }
+
+            _context.RecipeRatings.Remove(existingRating);
+            await _context.SaveChangesAsync();
+        }
+
+        return Json(new { success = true, newRating = recipe.Rating, newRatingCount = recipe.RatingCount });
+    }
+
+    public class RemoveRatingRequest { public int RecipeId { get; set; } }
+
 
 }
