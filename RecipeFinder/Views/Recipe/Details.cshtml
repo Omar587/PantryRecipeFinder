@@ -542,9 +542,9 @@
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <div class="action-section">
-                        <button class="favorite-button" id="favoriteBtn">
+                        <button class="favorite-button @(ViewBag.IsFavorited == true ? "favorited" : "")" id="favoriteBtn">
                             <span id="favoriteIcon">♥</span>
-                            <span id="favoriteText">Add to Favorites</span>
+                            <span id="favoriteText">@(ViewBag.IsFavorited == true ? "Saved to Favorites" : "Add to Favorites")</span>
                         </button>
                         
                         <div class="rating-section">
@@ -786,9 +786,10 @@
 
             // ─── Favorite Toggle ───────────────────────────────────────────────────────
             const favoriteBtn = document.getElementById('favoriteBtn');
-            const favoriteIcon = document.getElementById('favoriteIcon');
             const favoriteText = document.getElementById('favoriteText');
-            
+
+            let isFavorited = @(ViewBag.IsFavorited == true ? "true" : "false");
+
             favoriteBtn.addEventListener('click', async () => {
                 try {
                     const response = await fetch('/Recipe/ToggleFavorite', {
@@ -796,9 +797,13 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ recipeId })
                     });
-                    
+
+                    if (!response.ok) throw new Error('Server error');
+
                     const data = await response.json();
-                    if (data.isFavorited) {
+                    isFavorited = data.isFavorited;
+
+                    if (isFavorited) {
                         favoriteBtn.classList.add('favorited');
                         favoriteText.textContent = 'Saved to Favorites';
                     } else {
@@ -807,8 +812,9 @@
                     }
                 } catch (error) {
                     console.error('Error toggling favorite:', error);
+                    alert('Failed to update favorites. Please try again.');
                 }
-            });
+});
 
             // ─── Notes ─────────────────────────────────────────────────────────────────
             const noteText = document.getElementById('noteText');

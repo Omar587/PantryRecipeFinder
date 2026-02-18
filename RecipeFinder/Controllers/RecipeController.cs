@@ -94,21 +94,31 @@ public class RecipeController : Controller
    
     
     
-    public IActionResult Details(int id)
+    public async Task<IActionResult> Details(int id)
     {
-        var recipe = _context.Recipes
+        var recipe = await _context.Recipes
             .Include(r => r.Ingredients)
             .Include(r => r.Tags)
             .Include(r => r.Ratings)
             .Include(r => r.Notes)
-            .FirstOrDefault(r => r.Id == id);
+            .FirstOrDefaultAsync(r => r.Id == id);
 
         if (recipe == null)
             return NotFound();
 
+        if (User.Identity.IsAuthenticated)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            ViewBag.IsFavorited = await _context.FavoriteRecipes
+                .AnyAsync(f => f.CustomerId == user.Id && f.RecipeId == id);
+        }
+        else
+        {
+            ViewBag.IsFavorited = false;
+        }
+
         return View(recipe);
     }
-    
     
     
     [HttpPost]
@@ -286,6 +296,43 @@ public class RecipeController : Controller
     }
 
     public class RemoveRatingRequest { public int RecipeId { get; set; } }
+    
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> ToggleFavorite([FromBody] ToggleFavoriteRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Unauthorized();
+
+        var existing = await _context.FavoriteRecipes
+            .FirstOrDefaultAsync(f => f.CustomerId == user.Id && f.RecipeId == request.RecipeId);
+
+        bool isFavorited;
+
+        if (existing != null)
+        {
+            _context.FavoriteRecipes.Remove(existing);
+            isFavorited = false;
+        }
+        else
+        {
+            _context.FavoriteRecipes.Add(new FavoriteRecipe
+            {
+                CustomerId = user.Id,
+                RecipeId = request.RecipeId,
+                AddedAt = DateTime.UtcNow
+            });
+            isFavorited = true;
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok(new { isFavorited });
+    }
+
+    public class ToggleFavoriteRequest
+    {
+        public int RecipeId { get; set; }
+    }
 
 
 }
