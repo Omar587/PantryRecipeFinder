@@ -1,0 +1,258 @@
+@model IEnumerable<RecipeFinder.Models.Recipe>
+
+@{
+    ViewData["Title"] = "My Favorites";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: linear-gradient(135deg, #fef6e4 0%, #ffe8cc 100%);
+        min-height: 100vh;
+    }
+
+    .favorites-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .favorites-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .favorites-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        color: #ff6b35;
+    }
+
+    .favorites-header p {
+        color: #636e72;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    .empty-state .icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h2 {
+        font-family: 'Playfair Display', serif;
+        color: #2d3436;
+        font-size: 1.8rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p {
+        color: #636e72;
+        margin-bottom: 1.5rem;
+        font-size: 1rem;
+    }
+
+    .btn-browse {
+        display: inline-block;
+        padding: 0.875rem 2rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-browse:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.35);
+        color: white;
+    }
+
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 2rem;
+    }
+
+    .recipe-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+
+    .recipe-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(255, 107, 53, 0.2);
+    }
+
+    .recipe-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .recipe-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .recipe-card h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        color: #2d3436;
+        padding: 1.25rem 1.5rem 0.4rem;
+        line-height: 1.3;
+    }
+
+    .recipe-card p {
+        padding: 0 1.5rem 1rem;
+        color: #636e72;
+        line-height: 1.8;
+        font-size: 0.95rem;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .btn-details {
+        flex: 1;
+        display: inline-block;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-details:hover {
+        transform: translateX(3px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        color: white;
+    }
+
+    .btn-remove {
+        padding: 0.75rem 1rem;
+        background: #fff0ee;
+        color: #ff6b35;
+        border: 2px solid #ffd5c8;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove:hover {
+        background: #ff6b35;
+        color: white;
+        border-color: #ff6b35;
+        transform: scale(1.05);
+    }
+
+    .favorite-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(255, 107, 53, 0.9);
+        color: white;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        backdrop-filter: blur(4px);
+    }
+
+    @@media (max-width: 768px) {
+        .favorites-header h1 {
+            font-size: 2.2rem;
+        }
+
+        .recipe-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.25rem;
+        }
+    }
+</style>
+
+<div class="favorites-wrapper">
+    <div class="favorites-header">
+        <h1>❤️ My Favorites</h1>
+        <p>@Model.Count() recipe@(Model.Count() == 1 ? "" : "s") saved</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="icon">🍽️</div>
+            <h2>No favorites yet</h2>
+            <p>Start exploring recipes and hit the heart to save them here.</p>
+            <a asp-controller="Recipe" asp-action="Index" class="btn-browse">Browse Recipes →</a>
+        </div>
+    }
+    else
+    {
+        <div class="recipe-grid">
+            @foreach (var recipe in Model)
+            {
+                <div class="recipe-card">
+                    <div class="favorite-badge">❤️</div>
+                    <img
+                        src="@recipe.ImageUrl"
+                        alt="@recipe.Name"
+                        loading="lazy"
+                        srcset="@recipe.ImageUrl 1x, @recipe.ImageUrl.Replace(".jpg", "@2x.jpg") 2x"
+                        sizes="(max-width: 600px) 100vw, 280px"
+                    />
+                    <h3>@recipe.Name</h3>
+                    <p>
+                        <strong>Cuisine:</strong> @recipe.Cuisine <br />
+                        <strong>Difficulty:</strong> @recipe.Difficulty <br />
+                        <strong>Total Time:</strong> @recipe.TotalTime() min
+                    </p>
+                    <div class="card-actions">
+                        <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.Id" class="btn-details">
+                            View Details →
+                        </a>
+                        <form asp-controller="Favorites" asp-action="Remove" method="post" style="margin: 0;">
+                            <input type="hidden" name="recipeId" value="@recipe.Id" />
+                            <button type="submit" class="btn-remove" title="Remove from favorites">🗑</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
