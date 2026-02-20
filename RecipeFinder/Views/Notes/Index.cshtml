@@ -1,0 +1,360 @@
+@model IEnumerable<RecipeFinder.Models.RecipeNote>
+
+@{
+    ViewData["Title"] = "My Notes";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: linear-gradient(135deg, #fef6e4 0%, #ffe8cc 100%);
+        min-height: 100vh;
+    }
+
+    .notes-wrapper {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .notes-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .notes-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        color: #ff6b35;
+    }
+
+    .notes-header p {
+        color: #636e72;
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    .empty-state .icon { font-size: 4rem; margin-bottom: 1rem; }
+
+    .empty-state h2 {
+        font-family: 'Playfair Display', serif;
+        color: #2d3436;
+        font-size: 1.8rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .empty-state p { color: #636e72; margin-bottom: 1.5rem; }
+
+    .btn-browse {
+        display: inline-block;
+        padding: 0.875rem 2rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-family: 'Outfit', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .btn-browse:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255,107,53,0.35);
+        color: white;
+    }
+
+    .notes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .note-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .note-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 40px rgba(255,107,53,0.15);
+    }
+
+    .note-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #fff0eb;
+        background: linear-gradient(135deg, #fff8f5 0%, #fff3ee 100%);
+    }
+
+    .note-card-header img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+
+    .note-recipe-info { flex: 1; }
+
+    .note-recipe-info h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        color: #2d3436;
+        margin-bottom: 0.2rem;
+    }
+
+    .note-meta {
+        font-size: 0.82rem;
+        color: #b2bec3;
+    }
+
+    .note-meta span + span::before {
+        content: ' · ';
+    }
+
+    .view-recipe-link {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #ff6b35;
+        text-decoration: none;
+        padding: 0.4rem 0.9rem;
+        border: 2px solid #ffd5c8;
+        border-radius: 8px;
+        transition: all 0.25s ease;
+        white-space: nowrap;
+    }
+
+    .view-recipe-link:hover {
+        background: #ff6b35;
+        color: white;
+        border-color: #ff6b35;
+    }
+
+    /* View mode */
+    .note-body { padding: 1.25rem 1.5rem; }
+
+    .note-text-display {
+        color: #2d3436;
+        line-height: 1.8;
+        font-size: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .note-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .btn-edit {
+        padding: 0.6rem 1.25rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+
+    .btn-delete {
+        padding: 0.6rem 1.25rem;
+        background: #fff0ee;
+        color: #ff6b35;
+        border: 2px solid #ffd5c8;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background: #ff6b35;
+        color: white;
+        border-color: #ff6b35;
+    }
+
+    /* Edit mode */
+    .edit-form { display: none; padding: 1.25rem 1.5rem; border-top: 1px solid #fff0eb; }
+
+    .edit-form textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 0.875rem 1rem;
+        border: 2px solid #ffd5c8;
+        border-radius: 12px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        color: #2d3436;
+        resize: vertical;
+        transition: all 0.3s ease;
+        line-height: 1.7;
+    }
+
+    .edit-form textarea:focus {
+        outline: none;
+        border-color: #ff6b35;
+        box-shadow: 0 4px 12px rgba(255,107,53,0.15);
+    }
+
+    .edit-form-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 0.875rem;
+    }
+
+    .btn-save {
+        padding: 0.6rem 1.5rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+
+    .btn-cancel {
+        padding: 0.6rem 1.25rem;
+        background: #f1f2f6;
+        color: #636e72;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Outfit', sans-serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover { background: #dfe6e9; color: #2d3436; }
+
+    @@media (max-width: 600px) {
+        .notes-header h1 { font-size: 2.2rem; }
+        .note-card-header { flex-wrap: wrap; }
+        .view-recipe-link { width: 100%; text-align: center; }
+    }
+</style>
+
+<div class="notes-wrapper">
+    <div class="notes-header">
+        <h1>📝 My Notes</h1>
+        <p>@Model.Count() note@(Model.Count() == 1 ? "" : "s") across your recipes</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="icon">📓</div>
+            <h2>No notes yet</h2>
+            <p>Open a recipe and jot down your thoughts, tweaks, or reminders.</p>
+            <a asp-controller="Recipe" asp-action="Index" class="btn-browse">Browse Recipes →</a>
+        </div>
+    }
+    else
+    {
+        <div class="notes-list">
+            @foreach (var note in Model)
+            {
+                <div class="note-card" id="note-card-@note.Id">
+
+                    <!-- Header: recipe thumbnail + name + link -->
+                    <div class="note-card-header">
+                        <img src="@note.Recipe.ImageUrl" alt="@note.Recipe.Name" />
+                        <div class="note-recipe-info">
+                            <h3>@note.Recipe.Name</h3>
+                            <div class="note-meta">
+                                <span>Added @note.CreatedAt.ToString("MMM d, yyyy")</span>
+                                @if (note.UpdatedAt.HasValue)
+                                {
+                                    <span>Edited @note.UpdatedAt.Value.ToString("MMM d, yyyy")</span>
+                                }
+                            </div>
+                        </div>
+                        <a asp-controller="Recipe" asp-action="Details"
+                           asp-route-id="@note.RecipeId" class="view-recipe-link">
+                            View Recipe →
+                        </a>
+                    </div>
+
+                    <!-- View mode -->
+                    <div class="note-body" id="view-@note.Id">
+                        <p class="note-text-display">@note.NoteText</p>
+                        <div class="note-actions">
+                            <button class="btn-edit" onclick="openEdit(@note.Id, @Html.Raw(System.Text.Json.JsonSerializer.Serialize(note.NoteText)))">
+                                ✏️ Edit
+                            </button>
+                            <form asp-action="Delete" method="post" style="margin:0;"
+                                  onsubmit="return confirm('Delete this note?')">
+                                <input type="hidden" name="id" value="@note.Id" />
+                                <button type="submit" class="btn-delete">🗑 Delete</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Edit mode (hidden by default) -->
+                    <div class="edit-form" id="edit-@note.Id">
+                        <form asp-action="Edit" method="post">
+                            <input type="hidden" name="id" value="@note.Id" />
+                            <textarea name="noteText" id="textarea-@note.Id" required></textarea>
+                            <div class="edit-form-actions">
+                                <button type="submit" class="btn-save">💾 Save</button>
+                                <button type="button" class="btn-cancel" onclick="closeEdit(@note.Id)">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    function openEdit(id, currentText) {
+        document.getElementById('view-' + id).style.display = 'none';
+        const editForm = document.getElementById('edit-' + id);
+        editForm.style.display = 'block';
+        const textarea = document.getElementById('textarea-' + id);
+        textarea.value = currentText;
+        textarea.focus();
+    }
+
+    function closeEdit(id) {
+        document.getElementById('edit-' + id).style.display = 'none';
+        document.getElementById('view-' + id).style.display = 'block';
+    }
+</script>
