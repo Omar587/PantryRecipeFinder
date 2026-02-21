@@ -5,509 +5,1060 @@
     ViewData["Title"] = "Recipes";
 }
 
+
 <style>
-    @@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap');
-    
-    * {
+*, *::before, *::after {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
-    
+
     body {
-        font-family: 'Outfit', sans-serif;
-        background: linear-gradient(135deg, #fef6e4 0%, #ffe8cc 100%);
-        min-height: 100vh;
+        font-family: 'DM Sans', sans-serif;
+        background-color: #f9f5ef;
+        color: #1a1a1a;
+        -webkit-font-smoothing: antialiased;
     }
-    
-    .container-wrapper {
-        display: flex;
-        gap: 2rem;
-        max-width: 1600px;
+
+    /* ─── PAGE LAYOUT ─── */
+    .page-shell {
+        max-width: 1480px;
         margin: 0 auto;
-        padding: 2rem;
+        padding: 0 2rem 4rem;
     }
-    
-    /* Filter Sidebar */
+
+    /* ─── HERO BANNER ─── */
+    .page-hero {
+        position: relative;
+        padding: 1.75rem 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        border-bottom: 1px solid #c5bdb4;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .page-hero::before {
+        content: 'RECIPES';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(48px, 8vw, 110px);
+        font-weight: 300;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(139, 127, 116, 0.12);
+        white-space: nowrap;
+        pointer-events: none;
+        letter-spacing: 0.08em;
+        user-select: none;
+    }
+
+    .hero-title-group {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #e85d26;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-eyebrow::before {
+        content: '';
+        display: block;
+        width: 32px;
+        height: 1px;
+        background: #e85d26;
+    }
+
+    .hero-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+        font-weight: 300;
+        line-height: 1;
+        color: #1a1a1a;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-title em {
+        font-style: italic;
+        color: #e85d26;
+    }
+
+    .hero-meta {
+        position: relative;
+        z-index: 1;
+        text-align: right;
+    }
+
+    .hero-count {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.5rem;
+        font-weight: 300;
+        line-height: 1;
+        color: #1a1a1a;
+    }
+
+    .hero-count-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #8a7f74;
+    }
+
+    /* ─── MAIN LAYOUT SPLIT ─── */
+    .content-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 3rem;
+        align-items: start;
+    }
+
+    /* ─── FILTER SIDEBAR ─── */
     .filter-sidebar {
-        width: 320px;
-        min-width: 320px;
-        flex-shrink: 0;
-        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-        border-radius: 24px;
-        padding: 2rem;
-        box-shadow: 0 20px 60px rgba(255, 107, 53, 0.3);
-        align-self: flex-start;
         position: sticky;
         top: 2rem;
     }
-    
-    .filter-sidebar::-webkit-scrollbar {
-        width: 8px;
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #c5bdb4;
     }
-    
-    .filter-sidebar::-webkit-scrollbar-track {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-    }
-    
-    .filter-sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 10px;
-    }
-    
-    .filter-sidebar h2 {
-        font-family: 'Playfair Display', serif;
-        color: white;
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .filter-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .filter-group label {
-        display: block;
-        color: white;
+
+    .sidebar-header h2 {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.7rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        color: #8a7f74;
     }
-    
-    .filter-group select,
-    .filter-group input {
+
+    .sidebar-header-icon {
+        width: 28px;
+        height: 28px;
+        background: #e85d26;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .sidebar-header-icon svg {
+        width: 14px;
+        height: 14px;
+        stroke: white;
+    }
+
+    .filter-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8a7f74;
+        margin-bottom: 0.6rem;
+    }
+
+    .filter-select {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.95);
-        color: #333;
-        font-size: 1rem;
-        font-family: 'Outfit', sans-serif;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    
-    .filter-group select:focus,
-    .filter-group input:focus {
-        outline: none;
-        border-color: white;
-        background: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transform: translateY(-2px);
-    }
-    
-    .filter-group input[type="range"] {
-        cursor: pointer;
-        height: 8px;
-        border-radius: 5px;
-        background: rgba(255, 255, 255, 0.3);
+        padding: 0.7rem 2.25rem 0.7rem 0.9rem;
+        border: 1px solid #c5bdb4;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #1a1a1a;
+        font-size: 0.88rem;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 400;
+        appearance: none;
         -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a7f74' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        cursor: pointer;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    
-    .filter-group input[type="range"]::-webkit-slider-thumb {
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #e85d26;
+        box-shadow: 0 0 0 3px rgba(232, 93, 38, 0.1);
+    }
+
+    .filter-select:hover {
+        border-color: #8a7f74;
+    }
+
+    /* Rating Slider */
+    .rating-slider-wrapper {
+        position: relative;
+    }
+
+    .rating-track {
+        width: 100%;
+        height: 3px;
+        background: #f0e9dc;
+        border-radius: 2px;
+        margin-bottom: 0.75rem;
+        position: relative;
+    }
+
+    .rating-fill {
+        position: absolute;
+        height: 100%;
+        background: #e85d26;
+        border-radius: 2px;
+        transition: width 0.1s;
+        left: 0;
+        top: 0;
+    }
+
+    input[type="range"]#minRating {
         -webkit-appearance: none;
         appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: white;
+        width: 100%;
+        height: 3px;
+        background: transparent;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        transition: all 0.2s ease;
+        margin: 0;
     }
-    
-    .filter-group input[type="range"]::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    input[type="range"]#minRating::-webkit-slider-runnable-track {
+        height: 3px;
+        background: transparent;
+        border-radius: 2px;
     }
-    
-    .rating-display {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 700;
-        text-align: center;
+
+    input[type="range"]#minRating::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 2px solid #e85d26;
+        box-shadow: 0 2px 8px rgba(232, 93, 38, 0.3);
+        margin-top: -7.5px;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="range"]#minRating::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+        box-shadow: 0 3px 12px rgba(232, 93, 38, 0.4);
+    }
+
+    .rating-value-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-top: 0.5rem;
     }
-    
-    .filter-buttons {
+
+    .rating-value-display {
         display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.88rem;
+        font-weight: 500;
+        color: #1a1a1a;
+    }
+
+    .rating-stars {
+        color: #e85d26;
+        font-size: 0.75rem;
+    }
+
+    .rating-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.65rem;
+        color: #c5bdb4;
+        font-weight: 500;
+        margin-top: 0.3rem;
+    }
+
+    /* Filter divider */
+    .filter-divider {
+        height: 1px;
+        background: #f0e9dc;
+        margin: 1.75rem 0;
+    }
+
+    /* Filter action buttons */
+    .filter-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 0.75rem;
         margin-top: 2rem;
     }
-    
-    .btn-apply,
-    .btn-reset {
-        flex: 1;
-        padding: 0.875rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-family: 'Outfit', sans-serif;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
+
     .btn-apply {
-        background: white;
-        color: #ff6b35;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-apply:hover {
-        background: #fff5f0;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    }
-    
-    .btn-reset {
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border: 2px solid white;
-    }
-    
-    .btn-reset:hover {
-        background: rgba(255, 255, 255, 0.3);
-        transform: translateY(-2px);
-    }
-    
-    /* Main Content */
-    .main-content {
-        flex: 1;
-    }
-    
-    h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 3rem;
-        color: #ff6b35;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-    
-    .recipe-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
-    
-    .recipe-card {
-        background: white;
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .recipe-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 20px 50px rgba(255, 107, 53, 0.2);
-    }
-    
-    .recipe-card img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-    
-    .recipe-card:hover img {
-        transform: scale(1.05);
-    }
-    
-    .recipe-card h3 {
-        font-family: 'Playfair Display', serif;
-        font-size: 1.5rem;
-        color: #2d3436;
-        padding: 1.5rem 1.5rem 0.5rem;
-        line-height: 1.3;
-    }
-    
-    .recipe-card p {
-        padding: 0 1.5rem 1rem;
-        color: #636e72;
-        line-height: 1.8;
-    }
-    
-    .recipe-card a {
-        display: inline-block;
-        margin: 0 1.5rem 1.5rem;
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-        color: white;
-        text-decoration: none;
-        border-radius: 10px;
+        padding: 0.75rem;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    
-    .recipe-card a:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-    }
-    
-    /* Pagination */
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 2rem 0;
-    }
-    
-    .page-item {
-        list-style: none;
-    }
-    
-    .page-link {
-        display: block;
-        padding: 0.75rem 1.25rem;
-        background: white;
-        color: #ff6b35;
-        text-decoration: none;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    }
-    
-    .page-link:hover {
-        background: #ff6b35;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-    }
-    
-    .page-item.active .page-link {
-        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-        color: white;
-    }
-    
-    /* Select2-like searchable dropdown styling */
-    .select-wrapper {
-        position: relative;
-    }
-    
-    .select-wrapper select {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding-right: 2.5rem;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        background-size: 1.25rem;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s;
     }
 
-    @@media (max-width: 1200px) {
-        .container-wrapper {
-            flex-direction: column;
+    .btn-apply:hover {
+        background: #e85d26;
+        transform: translateY(-1px);
+    }
+
+    .btn-apply:active {
+        transform: translateY(0);
+    }
+
+    .btn-reset {
+        padding: 0.75rem;
+        background: transparent;
+        color: #8a7f74;
+        border: 1px solid #c5bdb4;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+        border-color: #8a7f74;
+        color: #1a1a1a;
+    }
+
+    /* Active filters indicator */
+    .active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 1.25rem;
+    }
+
+    .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.65rem;
+        background: #fef0e8;
+        color: #e85d26;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 500;
+    }
+
+    /* ─── RECIPE GRID ─── */
+    .grid-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.75rem;
+        gap: 1rem;
+    }
+
+    .grid-result-count {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #8a7f74;
+        letter-spacing: 0.05em;
+    }
+
+    .grid-result-count strong {
+        color: #1a1a1a;
+        font-weight: 600;
+    }
+
+    .grid-view-toggle {
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    .view-btn {
+        width: 34px;
+        height: 34px;
+        border: 1px solid #c5bdb4;
+        background: #ffffff;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #8a7f74;
+    }
+
+    .view-btn.active, .view-btn:hover {
+        background: #1a1a1a;
+        border-color: #1a1a1a;
+        color: white;
+    }
+
+    .view-btn svg {
+        width: 15px;
+        height: 15px;
+        stroke: currentColor;
+        fill: none;
+    }
+
+    .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .recipe-grid.list-view {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* ─── RECIPE CARD ─── */
+    .recipe-card {
+        background: #ffffff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(197, 189, 180, 0.4);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s;
+        animation: cardReveal 0.5s ease both;
+        cursor: pointer;
+    }
+
+    .recipe-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 48px rgba(26, 26, 26, 0.08), 0 4px 12px rgba(232, 93, 38, 0.12);
+        border-color: rgba(232, 93, 38, 0.2);
+    }
+
+    @@keyframes cardReveal {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
         }
-        
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .recipe-card:nth-child(1) { animation-delay: 0.04s; }
+    .recipe-card:nth-child(2) { animation-delay: 0.08s; }
+    .recipe-card:nth-child(3) { animation-delay: 0.12s; }
+    .recipe-card:nth-child(4) { animation-delay: 0.16s; }
+    .recipe-card:nth-child(5) { animation-delay: 0.20s; }
+    .recipe-card:nth-child(6) { animation-delay: 0.24s; }
+    .recipe-card:nth-child(7) { animation-delay: 0.28s; }
+    .recipe-card:nth-child(8) { animation-delay: 0.32s; }
+    .recipe-card:nth-child(9) { animation-delay: 0.36s; }
+
+    .card-image-wrap {
+        position: relative;
+        height: 160px;
+        overflow: hidden;
+        background: #f0e9dc;
+    }
+
+    .card-image-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        display: block;
+    }
+
+    .recipe-card:hover .card-image-wrap img {
+        transform: scale(1.06);
+    }
+
+    /* Difficulty badge overlay */
+    .card-badge {
+        position: absolute;
+        top: 0.85rem;
+        left: 0.85rem;
+        padding: 0.3rem 0.65rem;
+        border-radius: 100px;
+        font-size: 0.67rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .badge-easy {
+        background: rgba(255,255,255,0.92);
+        color: #2d7d46;
+        border: 1px solid rgba(45, 125, 70, 0.2);
+    }
+
+    .badge-medium {
+        background: rgba(255,255,255,0.92);
+        color: #c17b1a;
+        border: 1px solid rgba(193, 123, 26, 0.2);
+    }
+
+    .badge-hard {
+        background: rgba(255,255,255,0.92);
+        color: #c0392b;
+        border: 1px solid rgba(192, 57, 43, 0.2);
+    }
+
+    .card-cuisine-tag {
+        position: absolute;
+        bottom: 0.85rem;
+        right: 0.85rem;
+        padding: 0.3rem 0.65rem;
+        background: rgba(26, 26, 26, 0.78);
+        color: rgba(255,255,255,0.9);
+        border-radius: 100px;
+        font-size: 0.65rem;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        backdrop-filter: blur(6px);
+    }
+
+    /* Card body */
+    .card-body {
+        padding: 1rem 1.1rem 1.1rem;
+    }
+
+    .card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.15rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #1a1a1a;
+        margin-bottom: 0.65rem;
+        letter-spacing: -0.01em;
+        transition: color 0.2s;
+    }
+
+    .recipe-card:hover .card-title {
+        color: #e85d26;
+    }
+
+    .card-meta {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: #8a7f74;
+        font-weight: 400;
+    }
+
+    .meta-item svg {
+        width: 13px;
+        height: 13px;
+        stroke: #c5bdb4;
+        fill: none;
+        flex-shrink: 0;
+    }
+
+    .meta-dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #c5bdb4;
+        flex-shrink: 0;
+    }
+
+    .card-divider {
+        height: 1px;
+        background: #f0e9dc;
+        margin-bottom: 1.1rem;
+    }
+
+    .card-footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #e85d26;
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        transition: gap 0.2s;
+    }
+
+    .card-link:hover {
+        gap: 0.75rem;
+    }
+
+    .card-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        transition: transform 0.2s;
+    }
+
+    .card-link:hover svg {
+        transform: translateX(3px);
+    }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 2rem;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2rem;
+        font-weight: 400;
+        color: #8a7f74;
+    }
+
+    .empty-sub {
+        font-size: 0.9rem;
+        color: #c5bdb4;
+        max-width: 320px;
+        line-height: 1.6;
+    }
+
+    /* ─── PAGINATION ─── */
+    .pagination-wrap {
+        margin-top: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 0.75rem;
+        border: 1px solid #c5bdb4;
+        background: #ffffff;
+        color: #8a7f74;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        border-color: #1a1a1a;
+        color: #1a1a1a;
+        background: #f0e9dc;
+    }
+
+    .page-link.active {
+        background: #1a1a1a;
+        border-color: #1a1a1a;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .page-link.prev-next {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0 1rem;
+    }
+
+    .page-ellipsis {
+        display: flex;
+        align-items: center;
+        color: #c5bdb4;
+        padding: 0 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @@media (max-width: 1100px) {
+        .content-layout {
+            grid-template-columns: 240px 1fr;
+            gap: 2rem;
+        }
+    }
+
+    @@media (max-width: 860px) {
+        .content-layout {
+            grid-template-columns: 1fr;
+        }
+
         .filter-sidebar {
-            width: 100%;
             position: relative;
             top: 0;
         }
-        
+
+        .filter-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem 2rem;
+        }
+
+        .filter-divider { display: none; }
+        .filter-actions { grid-column: 1 / -1; }
+
+        .page-hero::before {
+            display: none;
+        }
+
+        .hero-count {
+            font-size: 2.5rem;
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .page-shell {
+            padding: 0 1rem 3rem;
+        }
+
+        .filter-body {
+            grid-template-columns: 1fr;
+        }
+
         .recipe-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: 1fr;
+        }
+
+        .page-hero {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .hero-meta {
+            text-align: left;
         }
     }
 </style>
 
-<div class="container-wrapper">
-    <!-- Filter Sidebar -->
-    <aside class="filter-sidebar">
-        <h2>Filter Recipes</h2>
-        <form id="filterForm" method="get" asp-action="Index">
-            <div class="filter-group">
-                <label for="cuisine">Cuisine</label>
-                <div class="select-wrapper">
-                    <select id="cuisine" name="cuisine">
-                        <option value="">All Cuisines</option>
-                        @foreach (var cuisine in Enum.GetValues(typeof(Cuisine)))
-                        {
-                            <option value="@cuisine" selected="@(ViewBag.SelectedCuisine == cuisine.ToString())">
-                                @cuisine
-                            </option>
-                        }
-                    </select>
-                </div>
-            </div>
+<div class="page-shell">
 
-            <div class="filter-group">
-                <label for="difficulty">Difficulty</label>
-                <div class="select-wrapper">
-                    <select id="difficulty" name="difficulty">
-                        <option value="">All Difficulties</option>
-                        @foreach (var difficulty in Enum.GetValues(typeof(Difficulty)))
-                        {
-                            <option value="@difficulty" selected="@(ViewBag.SelectedDifficulty == difficulty.ToString())">
-                                @difficulty
-                            </option>
-                        }
-                    </select>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label for="minRating">Minimum Rating</label>
-                <input type="range" id="minRating" name="minRating" min="0" max="5" step="0.5" 
-                       value="@(ViewBag.SelectedMinRating ?? 0)" />
-                <div class="rating-display">
-                    <span id="ratingValue">@(ViewBag.SelectedMinRating ?? 0)</span> ⭐
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label for="cookTime">Cook Time</label>
-                <div class="select-wrapper">
-                    <select id="cookTime" name="cookTime">
-                        <option value="">Any Duration</option>
-                        <option value="<30" selected="@(ViewBag.SelectedCookTime == "<30")">Under 30 min</option>
-                        <option value="30-60" selected="@(ViewBag.SelectedCookTime == "30-60")">30-60 min</option>
-                        <option value=">60" selected="@(ViewBag.SelectedCookTime == ">60")">Over 60 min</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label for="dietary">Dietary Options</label>
-                <div class="select-wrapper">
-                    <select id="dietary" name="dietary">
-                        <option value="">All Options</option>
-                        <option value="Vegetarian" selected="@(ViewBag.SelectedDietary == "Vegetarian")">Vegetarian</option>
-                        <option value="Vegan" selected="@(ViewBag.SelectedDietary == "Vegan")">Vegan</option>
-                        <option value="GlutenFree" selected="@(ViewBag.SelectedDietary == "GlutenFree")">Gluten Free</option>
-                        <option value="DairyFree" selected="@(ViewBag.SelectedDietary == "DairyFree")">Dairy Free</option>
-                    </select>
-                </div>
-            </div>
-
-            <input type="hidden" name="p" value="1" />
-
-            <div class="filter-buttons">
-                <button type="submit" class="btn-apply">Apply</button>
-                <button type="button" class="btn-reset" onclick="resetFilters()">Reset</button>
-            </div>
-        </form>
-    </aside>
-
-    <!-- Main Content -->
-    <!-- Main Content -->
-    <main class="main-content">
-        <h1>Discover Recipes</h1>
-
-        <div class="recipe-grid">
-            @foreach (var recipe in Model)
-            {
-                <div class="recipe-card">
-                    <img 
-                        src="@recipe.ImageUrl" 
-                        alt="@recipe.Name" 
-                        loading="lazy"
-                        srcset="@recipe.ImageUrl 1x, @recipe.ImageUrl.Replace(".jpg", "@2x.jpg") 2x"
-                        sizes="(max-width: 600px) 100vw, 250px"
-                    />
-                    <h3>@recipe.Name</h3>
-                    <p>
-                        <strong>Cuisine:</strong> @recipe.Cuisine <br />
-                        <strong>Difficulty:</strong> @recipe.Difficulty <br />
-                        <strong>Total Time:</strong> @recipe.TotalTime() min
-                    </p>
-                    <a asp-action="Details" asp-route-id="@recipe.Id">View Details →</a>
-                </div>
-            }
+    <!-- ── HERO ── -->
+    <div class="page-hero">
+        <div class="hero-title-group">
+            <div class="hero-eyebrow">Curated Collection</div>
+            <h1 class="hero-title">Discover &amp; <em>Cook</em></h1>
         </div>
+        <div class="hero-meta">
+            <div class="hero-count">@Model.Count()</div>
+            <div class="hero-count-label">Recipes Found</div>
+        </div>
+    </div>
 
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                @if (ViewBag.TotalPages != null)
+    <div class="content-layout">
+
+        <!-- ── FILTER SIDEBAR ── -->
+        <aside class="filter-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-header-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                </div>
+                <h2>Refine Results</h2>
+            </div>
+
+            <form id="filterForm" method="get" asp-action="Index">
+                <div class="filter-body">
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="cuisine">Cuisine</label>
+                        <select id="cuisine" name="cuisine" class="filter-select">
+                            <option value="">All Cuisines</option>
+                            @foreach (var cuisine in Enum.GetValues(typeof(Cuisine)))
+                            {
+                                <option value="@cuisine" selected="@(ViewBag.SelectedCuisine == cuisine.ToString())">@cuisine</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="difficulty">Difficulty</label>
+                        <select id="difficulty" name="difficulty" class="filter-select">
+                            <option value="">Any Level</option>
+                            @foreach (var difficulty in Enum.GetValues(typeof(Difficulty)))
+                            {
+                                <option value="@difficulty" selected="@(ViewBag.SelectedDifficulty == difficulty.ToString())">@difficulty</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="cookTime">Cook Time</label>
+                        <select id="cookTime" name="cookTime" class="filter-select">
+                            <option value="">Any Duration</option>
+                            <option value="<30" selected="@(ViewBag.SelectedCookTime == "<30")">Under 30 min</option>
+                            <option value="30-60" selected="@(ViewBag.SelectedCookTime == "30-60")">30 – 60 min</option>
+                            <option value=">60" selected="@(ViewBag.SelectedCookTime == ">60")">Over 60 min</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="dietary">Dietary</label>
+                        <select id="dietary" name="dietary" class="filter-select">
+                            <option value="">All Options</option>
+                            <option value="Vegetarian" selected="@(ViewBag.SelectedDietary == "Vegetarian")">Vegetarian</option>
+                            <option value="Vegan" selected="@(ViewBag.SelectedDietary == "Vegan")">Vegan</option>
+                            <option value="GlutenFree" selected="@(ViewBag.SelectedDietary == "GlutenFree")">Gluten Free</option>
+                            <option value="DairyFree" selected="@(ViewBag.SelectedDietary == "DairyFree")">Dairy Free</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-divider"></div>
+
+                    <div class="filter-group">
+                        <label class="filter-label" for="minRating">Minimum Rating</label>
+                        <input type="range" id="minRating" name="minRating" min="0" max="5" step="0.5"
+                               value="@(ViewBag.SelectedMinRating ?? 0)" />
+                        <div class="rating-value-row">
+                            <div class="rating-value-display">
+                                <span id="ratingValue">@(ViewBag.SelectedMinRating ?? 0)</span>
+                                <span class="rating-stars">★★★★★</span>
+                            </div>
+                            <div style="font-size:0.7rem;color:#c5bdb4">& above</div>
+                        </div>
+                        <div class="rating-labels">
+                            <span>0</span>
+                            <span>2.5</span>
+                            <span>5</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <input type="hidden" name="p" value="1" />
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">Apply</button>
+                    <button type="button" class="btn-reset" onclick="resetFilters()">Clear All</button>
+                </div>
+            </form>
+        </aside>
+
+        <!-- ── RECIPE GRID ── -->
+        <main>
+            <div class="grid-header">
+                <div class="grid-result-count">
+                    Showing <strong>@Model.Count()</strong> recipes
+                    @if (!string.IsNullOrEmpty(ViewBag.SelectedCuisine?.ToString()))
+                    {
+                        <span> in <strong>@ViewBag.SelectedCuisine</strong></span>
+                    }
+                </div>
+                <div class="grid-view-toggle">
+                    <button class="view-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid view">
+                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                        </svg>
+                    </button>
+                    <button class="view-btn" id="listViewBtn" onclick="setView('list')" title="List view">
+                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="recipe-grid" id="recipeGrid">
+                @if (!Model.Any())
                 {
-                    int totalPages = ViewBag.TotalPages;
-                    int currentPage = ViewBag.CurrentPage ?? 1;
+                    <div class="empty-state">
+                        <div class="empty-icon">🍽</div>
+                        <div class="empty-title">No recipes found</div>
+                        <div class="empty-sub">Try adjusting your filters or clearing them to explore the full collection.</div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var recipe in Model)
+                    {
+                        string badgeClass = recipe.Difficulty.ToString() switch {
+                            "Easy" => "badge-easy",
+                            "Hard" => "badge-hard",
+                            _ => "badge-medium"
+                        };
+
+                        <article class="recipe-card" onclick="window.location='@Url.Action("Details", "Recipe", new { id = recipe.Id })'">
+                            <div class="card-image-wrap">
+                                <img 
+                                    src="@recipe.ImageUrl" 
+                                    alt="@recipe.Name" 
+                                    loading="lazy"
+                                />
+                                <span class="card-badge @badgeClass">@recipe.Difficulty</span>
+                                <span class="card-cuisine-tag">@recipe.Cuisine</span>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">@recipe.Name</h3>
+                                <div class="card-meta">
+                                    <div class="meta-item">
+                                        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                        @recipe.TotalTime() min
+                                    </div>
+                                    <div class="meta-dot"></div>
+                                    <div class="meta-item">
+                                        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                        </svg>
+                                        @recipe.Difficulty
+                                    </div>
+                                </div>
+                                <div class="card-divider"></div>
+                                <div class="card-footer-row">
+                                    <a class="card-link" asp-action="Details" asp-route-id="@recipe.Id">
+                                        View Recipe
+                                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="5" y1="12" x2="19" y2="12"/>
+                                            <polyline points="12 5 19 12 12 19"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                    }
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages != null && (int)ViewBag.TotalPages > 1)
+            {
+                int totalPages = ViewBag.TotalPages;
+                int currentPage = ViewBag.CurrentPage ?? 1;
+
+                string BuildPageUrl(int pg) =>
+                    $"?page={pg}&cuisine={ViewBag.SelectedCuisine}&difficulty={ViewBag.SelectedDifficulty}&minRating={ViewBag.SelectedMinRating}&cookTime={ViewBag.SelectedCookTime}&dietary={ViewBag.SelectedDietary}";
+
+                <nav class="pagination-wrap" aria-label="Pagination">
+                    @if (currentPage > 1)
+                    {
+                        <a class="page-link prev-next" href="@BuildPageUrl(currentPage - 1)">← Prev</a>
+                    }
 
                     @for (int i = 1; i <= totalPages; i++)
                     {
-                        <li class="page-item @(i == currentPage ? "active" : "")">
-                            <a class="page-link" href="?page=@i&cuisine=@ViewBag.SelectedCuisine&difficulty=@ViewBag.SelectedDifficulty&minRating=@ViewBag.SelectedMinRating&cookTime=@ViewBag.SelectedCookTime&dietary=@ViewBag.SelectedDietary">@i</a>
-                        </li>
+                        if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                        {
+                            <a class="page-link @(i == currentPage ? "active" : "")" href="@BuildPageUrl(i)">@i</a>
+                        }
+                        else if (i == currentPage - 3 || i == currentPage + 3)
+                        {
+                            <span class="page-ellipsis">···</span>
+                        }
                     }
-                }
-            </ul>
-        </nav>
-    </main>
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a class="page-link prev-next" href="@BuildPageUrl(currentPage + 1)">Next →</a>
+                    }
+                </nav>
+            }
+        </main>
+    </div>
 </div>
 
 <script>
-    // Update rating display
-    const ratingSlider = document.getElementById('minRating');
-    const ratingValue = document.getElementById('ratingValue');
-    
-    ratingSlider.addEventListener('input', function() {
-        ratingValue.textContent = this.value;
-    });
-    
-    // Reset filters function
+    // Rating slider — live label + filled track color
+    const slider = document.getElementById('minRating');
+    const ratingDisplay = document.getElementById('ratingValue');
+
+    function updateSlider() {
+        const min = parseFloat(slider.min) || 0;
+        const max = parseFloat(slider.max) || 5;
+        const val = parseFloat(slider.value) || 0;
+        const pct = ((val - min) / (max - min)) * 100;
+        slider.style.background = 'linear-gradient(to right, #e85d26 0%, #e85d26 ' + pct + '%, #f0e9dc ' + pct + '%, #f0e9dc 100%)';
+        ratingDisplay.textContent = val;
+    }
+
+    if (slider && ratingDisplay) {
+        slider.addEventListener('input', updateSlider);
+        updateSlider(); // apply on page load to reflect saved value
+    }
+
+    // Reset filters
     function resetFilters() {
         window.location.href = '@Url.Action("Index", "Recipe")';
     }
-    
-    // Add search functionality to selects with many options
-    const cuisineSelect = document.getElementById('cuisine');
-    const originalCuisineOptions = Array.from(cuisineSelect.options);
-    
-    // Make cuisine searchable (since it has many options)
-    cuisineSelect.addEventListener('focus', function() {
-        this.size = Math.min(10, this.options.length);
-    });
-    
-    cuisineSelect.addEventListener('blur', function() {
-        setTimeout(() => {
-            this.size = 1;
-        }, 200);
-    });
-    
-    cuisineSelect.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            this.size = 1;
-            this.blur();
-            return;
+
+    // Grid / List toggle
+    function setView(mode) {
+        const grid = document.getElementById('recipeGrid');
+        const gridBtn = document.getElementById('gridViewBtn');
+        const listBtn = document.getElementById('listViewBtn');
+        if (!grid) return;
+
+        if (mode === 'list') {
+            grid.classList.add('list-view');
+            listBtn.classList.add('active');
+            gridBtn.classList.remove('active');
+            localStorage.setItem('recipeView', 'list');
+        } else {
+            grid.classList.remove('list-view');
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+            localStorage.setItem('recipeView', 'grid');
         }
-        
-        const searchTerm = this.value.toLowerCase();
-        
-        // Clear current options
-        while (this.options.length > 0) {
-            this.remove(0);
-        }
-        
-        // Add "All Cuisines" option
-        const allOption = document.createElement('option');
-        allOption.value = '';
-        allOption.text = 'All Cuisines';
-        this.add(allOption);
-        
-        // Filter and add matching options
-        originalCuisineOptions.forEach(opt => {
-            if (opt.value === '' || opt.text.toLowerCase().includes(searchTerm)) {
-                this.add(opt.cloneNode(true));
-            }
-        });
-        
-        this.size = Math.min(10, this.options.length);
-    });
-    
-    // Restore filtered selection on change
-    cuisineSelect.addEventListener('change', function() {
-        this.size = 1;
-        this.blur();
-    });
+    }
+
+    // Restore saved view
+    (function () {
+        const saved = localStorage.getItem('recipeView');
+        if (saved === 'list') setView('list');
+    })();
 </script>

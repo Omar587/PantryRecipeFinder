@@ -1,52 +1,142 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RecipeFinder</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/RecipeFinder.styles.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/recipe-card.css"/>
-</head>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RecipeFinder.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/recipe-card.css" />
 
+    <style>
+        /* Hard-Coded Slate & Amber Theme */
+        .custom-navbar {
+            background-color: #2d3436; /* Deep Slate */
+            padding: 0.8rem 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: none;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffffff !important;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: #dfe6e9 !important; /* Light grey text */
+            margin: 0 10px;
+            transition: all 0.2s ease;
+            opacity: 0.85;
+        }
+
+        .nav-link:hover {
+            color: #fab1a0 !important; /* Warm Amber */
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        /* User Profile Pill */
+        .user-capsule {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 6px 16px;
+            color: white !important;
+            font-size: 0.9rem;
+        }
+
+        .user-capsule:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fab1a0; /* Hard-coded Amber */
+        }
+
+        /* Dropdown Customization */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 0.6rem;
+            background: #ffffff;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        .dropdown-item:hover {
+            background-color: #fff4f1;
+            color: #e17055;
+        }
+
+        /* Sign Up Button */
+        .btn-signup {
+            background-color: #fab1a0; /* Hard-coded Amber */
+            color: #2d3436 !important;
+            border-radius: 50px;
+            padding: 8px 22px;
+            font-weight: 700;
+            margin-left: 12px;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-signup:hover {
+            background-color: #ff9f89;
+            box-shadow: 0 4px 12px rgba(250, 177, 160, 0.4);
+            transform: scale(1.03);
+        }
+
+        .navbar-toggler {
+            border: none;
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
 <body>
+
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                <strong>🍳 RecipeFinder</strong>
+    <nav class="navbar navbar-expand-md navbar-dark custom-navbar sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                <span class="me-2">🍳</span> RecipeFinder
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
+
+            <div class="navbar-collapse collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Recipe" asp-action="Index">Browse Recipes</a>
+                        <a class="nav-link" asp-controller="Recipe" asp-action="Index">Browse Recipes</a>
                     </li>
                 </ul>
                 
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                👤 @User.Identity.Name
+                            <a class="nav-link dropdown-toggle user-capsule d-flex align-items-center" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
+                                <span class="me-2">👤</span> @User.Identity.Name
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                <a asp-controller="Favorites" asp-action="Index">My Favorites</a>
-                                <a asp-controller="Notes" asp-action="Index">My Notes</a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                                <li><a class="dropdown-item" asp-controller="Favorites" asp-action="Index">⭐ My Favorites</a></li>
+                                <li><a class="dropdown-item" asp-controller="Notes" asp-action="Index">📝 My Notes</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post">
-                                        <button type="submit" class="dropdown-item">Logout</button>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        <button type="submit" class="dropdown-item text-danger">Logout 🚪</button>
                                     </form>
                                 </li>
                             </ul>
@@ -58,7 +148,7 @@
                             <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Account" asp-action="Register">Sign Up</a>
+                            <a class="nav-link btn-signup" asp-controller="Account" asp-action="Register">Sign Up</a>
                         </li>
                     }
                 </ul>
@@ -68,14 +158,14 @@
 </header>
 
 <div class="container">
-    <main role="main" class="pb-3">
+    <main role="main" class="pb-5 mt-4">
         @RenderBody()
     </main>
 </div>
 
-<footer class="border-top footer text-muted">
-    <div class="container text-center py-3">
-        &copy; 2026 - RecipeFinder
+<footer class="border-top footer py-4 mt-auto">
+    <div class="container text-center">
+        <p class="mb-0 text-muted">&copy; 2026 - <strong>RecipeFinder</strong></p>
     </div>
 </footer>
 
