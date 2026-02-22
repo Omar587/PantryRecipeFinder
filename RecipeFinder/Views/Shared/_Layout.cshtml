@@ -3,156 +3,601 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - RecipeFinder</title>
+    <title>@ViewData["Title"] - Cook & Connect</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RecipeFinder.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/recipe-card.css" />
 
     <style>
-        /* Hard-Coded Slate & Amber Theme */
-        .custom-navbar {
-            background-color: #2d3436; /* Deep Slate */
-            padding: 0.8rem 1rem;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border: none;
+        /* ── Main nav ── */
+        .main-nav {
+            background: #f9f5ef;
+            border-bottom: 1px solid #ddd7ce;
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            transition: box-shadow 0.3s, background 0.3s;
         }
 
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #ffffff !important;
-            letter-spacing: -0.5px;
+        .main-nav.scrolled {
+            background: rgba(249,245,239,0.95);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: 0 2px 32px rgba(26,26,26,0.07);
         }
 
-        .nav-link {
-            font-weight: 500;
-            color: #dfe6e9 !important; /* Light grey text */
-            margin: 0 10px;
-            transition: all 0.2s ease;
-            opacity: 0.85;
+        .nav-inner {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
         }
 
-        .nav-link:hover {
-            color: #fab1a0 !important; /* Warm Amber */
-            opacity: 1;
-            transform: translateY(-1px);
+        /* ── Brand ── */
+        .nav-brand {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
         }
 
-        /* User Profile Pill */
-        .user-capsule {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50px;
-            padding: 6px 16px;
-            color: white !important;
-            font-size: 0.9rem;
+        .brand-mark {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
         }
 
-        .user-capsule:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #fab1a0; /* Hard-coded Amber */
+        .brand-mark-circle {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #e85d26;
         }
 
-        /* Dropdown Customization */
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            border-radius: 12px;
-            padding: 0.6rem;
-            background: #ffffff;
+        .brand-mark-circle:first-child {
+            top: 0; left: 0;
+            background: #e85d26;
+            opacity: 0.15;
         }
 
-        .dropdown-item {
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-weight: 500;
-            color: #2d3436;
+        .brand-mark-circle:last-child {
+            bottom: 0; right: 0;
+            background: transparent;
         }
 
-        .dropdown-item:hover {
-            background-color: #fff4f1;
-            color: #e17055;
+        .brand-mark-dot {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #e85d26;
         }
 
-        /* Sign Up Button */
-        .btn-signup {
-            background-color: #fab1a0; /* Hard-coded Amber */
-            color: #2d3436 !important;
-            border-radius: 50px;
-            padding: 8px 22px;
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+            gap: 2px;
+        }
+
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
             font-weight: 700;
-            margin-left: 12px;
-            border: none;
-            transition: all 0.3s;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
         }
 
-        .btn-signup:hover {
-            background-color: #ff9f89;
-            box-shadow: 0 4px 12px rgba(250, 177, 160, 0.4);
-            transform: scale(1.03);
+        .brand-name em {
+            font-style: italic;
+            color: #e85d26;
         }
 
-        .navbar-toggler {
+        .brand-tagline {
+            font-size: 0.6rem;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #8a7f74;
+        }
+
+        /* ── Nav links ── */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-page-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #8a7f74;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-page-link:hover {
+            color: #1a1a1a;
+            background: #f0e9dc;
+            text-decoration: none;
+        }
+
+        .nav-page-link.active {
+            color: #e85d26;
+            font-weight: 600;
+        }
+
+        /* ── Divider ── */
+        .nav-sep {
+            width: 1px;
+            height: 20px;
+            background: #ddd7ce;
+            flex-shrink: 0;
+        }
+
+        /* ── Spacer ── */
+        .nav-spacer { flex: 1; }
+
+        /* ── Search ── */
+        .nav-search {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd7ce;
+            border-radius: 100px;
+            background: #fff;
+            color: #8a7f74;
+            font-size: 0.8rem;
+            width: 160px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-search:focus-within {
+            border-color: #e85d26;
+            box-shadow: 0 0 0 3px rgba(232,93,38,0.08);
+        }
+
+        .nav-search svg {
+            width: 14px; height: 14px;
+            stroke: #8a7f74;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        .nav-search input {
             border: none;
-            background: rgba(255,255,255,0.1);
+            outline: none;
+            background: transparent;
+            font-size: 0.8rem;
+            font-family: 'DM Sans', sans-serif;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .nav-search input::placeholder { color: #8a7f74; }
+
+        /* ── Auth buttons ── */
+        .nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-nav-login {
+            padding: 0.5rem 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-nav-login:hover {
+            background: #f0e9dc;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .btn-nav-join {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 1.1rem;
+            background: #e85d26;
+            color: #fff !important;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-decoration: none;
+            border-radius: 100px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-nav-join:hover {
+            background: #cf4e1f;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(232,93,38,0.28);
+            text-decoration: none;
+            color: #fff !important;
+        }
+
+        /* ── User pill + dropdown ── */
+        .nav-user-wrap {
+            position: relative;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.35rem 0.75rem 0.35rem 0.4rem;
+            border: 1px solid #ddd7ce;
+            border-radius: 100px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .user-pill:hover,
+        .user-pill[aria-expanded="true"] {
+            border-color: #e85d26;
+            box-shadow: 0 2px 12px rgba(232,93,38,0.1);
+        }
+
+        .user-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e85d26, #fab1a0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .pill-chevron {
+            width: 12px; height: 12px;
+            stroke: #8a7f74;
+            fill: none;
+            transition: transform 0.2s;
+        }
+
+        .user-pill[aria-expanded="true"] .pill-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* Override Bootstrap dropdown */
+        .nav-user-wrap .dropdown-menu {
+            border: 1px solid #ddd7ce !important;
+            box-shadow: 0 20px 56px rgba(26,26,26,0.13) !important;
+            border-radius: 14px !important;
+            padding: 0.5rem !important;
+            background: #fff !important;
+            min-width: 210px;
+            margin-top: 10px !important;
+        }
+
+        .nav-user-wrap .dropdown-header-custom {
+            padding: 0.65rem 0.8rem 0.8rem;
+            border-bottom: 1px solid #f0e9dc;
+            margin-bottom: 0.4rem;
+        }
+
+        .nav-user-wrap .dropdown-header-custom .dd-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .nav-user-wrap .dropdown-item {
+            border-radius: 9px !important;
+            padding: 0.6rem 0.8rem !important;
+            font-size: 0.83rem !important;
+            font-weight: 500 !important;
+            color: #1a1a1a !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-user-wrap .dropdown-item:hover {
+            background: #fef0e8 !important;
+            color: #e85d26 !important;
+        }
+
+        .nav-user-wrap .dropdown-item.text-danger:hover {
+            background: #fff5f5 !important;
+            color: #c0392b !important;
+        }
+
+        .nav-user-wrap .dropdown-divider {
+            border-color: #f0e9dc !important;
+            margin: 0.35rem 0 !important;
+        }
+
+        /* ── Mobile hamburger ── */
+        .nav-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.4rem;
+            margin-left: auto;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 22px;
+            height: 1.5px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+
+        .nav-toggle.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .nav-toggle.open span:nth-child(2) { opacity: 0; }
+        .nav-toggle.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        /* ── Mobile drawer ── */
+        .mobile-drawer {
+            display: none;
+            flex-direction: column;
+            padding: 1rem 1.5rem 1.5rem;
+            border-top: 1px solid #ddd7ce;
+            background: #f9f5ef;
+            gap: 0.2rem;
+        }
+
+        .mobile-drawer.open {
+            display: flex;
+            animation: drawerIn 0.22s ease;
+        }
+
+        @@keyframes drawerIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .mobile-search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #ddd7ce;
+            border-radius: 10px;
+            background: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-search-wrap svg {
+            width: 14px; height: 14px;
+            stroke: #8a7f74;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        .mobile-search-wrap input {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.85rem;
+            font-family: 'DM Sans', sans-serif;
+            color: #1a1a1a;
+            width: 100%;
+        }
+
+        .mobile-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 0.5rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-decoration: none;
+            border-bottom: 1px solid #f0e9dc;
+        }
+
+        .mobile-nav-link:last-of-type { border-bottom: none; }
+        .mobile-nav-link:hover { color: #e85d26; text-decoration: none; }
+
+        .mobile-auth {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .mobile-auth .btn-nav-login {
+            text-align: center;
+            border: 1px solid #ddd7ce;
+            border-radius: 8px;
+            padding: 0.65rem;
+        }
+
+        .mobile-auth .btn-nav-join {
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            border-top: 1px solid #ddd7ce;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        .site-footer p {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.82rem;
+            color: #8a7f74;
+            margin: 0;
+        }
+
+        .site-footer strong {
+            color: #1a1a1a;
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        @@media (max-width: 860px) {
+            .nav-links,
+            .nav-sep,
+            .nav-search,
+            .nav-auth,
+            .nav-user-wrap { display: none !important; }
+            .nav-toggle { display: flex; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <nav class="navbar navbar-expand-md navbar-dark custom-navbar sticky-top">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
-                <span class="me-2">🍳</span> RecipeFinder
+    <!-- Main nav -->
+    <nav class="main-nav" id="mainNav">
+        <div class="nav-inner">
+
+            <!-- Brand -->
+            <a class="nav-brand" asp-controller="Home" asp-action="Index">
+                <div class="brand-mark" aria-hidden="true">
+                    <div class="brand-mark-circle"></div>
+                    <div class="brand-mark-circle"></div>
+                    <div class="brand-mark-dot"></div>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">Cook <em>&</em> Connect</span>
+                    <span class="brand-tagline">Community Kitchen</span>
+                </div>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
-                <span class="navbar-toggler-icon"></span>
+
+            <!-- Primary links -->
+            <ul class="nav-links">
+                <li><a class="nav-page-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                <li><a class="nav-page-link" asp-controller="Recipe" asp-action="Index">Browse Recipes</a></li>
+                <li><a class="nav-page-link" asp-controller="Recipe" asp-action="Index">Community Forum</a></li>
+            </ul>
+
+            <div class="nav-sep"></div>
+
+            <!-- Search -->
+            <div class="nav-search">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="Search recipes…" />
+            </div>
+
+            <div class="nav-spacer"></div>
+
+            <!-- Auth -->
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="nav-user-wrap dropdown">
+                    <a class="user-pill dropdown-toggle" href="#" id="userDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-avatar">
+                            @(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpper() : "U")
+                        </div>
+                        @User.Identity.Name
+                        <svg class="pill-chevron" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li>
+                            <div class="dropdown-header-custom">
+                                <div class="dd-name">@User.Identity.Name</div>
+                            </div>
+                        </li>
+                        <li><a class="dropdown-item" asp-controller="Favorites" asp-action="Index">⭐ My Favorites</a></li>
+                        <li><a class="dropdown-item" asp-controller="Notes" asp-action="Index">📝 My Notes</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item text-danger">🚪 Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <div class="nav-auth">
+                    <a class="btn-nav-login" asp-controller="Account" asp-action="Login">Login</a>
+                    <a class="btn-nav-join" asp-controller="Account" asp-action="Register">Join the Kitchen</a>
+                </div>
+            }
+
+            <!-- Mobile toggle -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" onclick="toggleMobileNav()">
+                <span></span><span></span><span></span>
             </button>
 
-            <div class="navbar-collapse collapse" id="navbarMain">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Recipe" asp-action="Index">Browse Recipes</a>
-                    </li>
-                </ul>
-                
-                <ul class="navbar-nav ms-auto align-items-center">
-                    @if (User.Identity.IsAuthenticated)
-                    {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle user-capsule d-flex align-items-center" href="#" id="userMenu" role="button" data-bs-toggle="dropdown">
-                                <span class="me-2">👤</span> @User.Identity.Name
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                                <li><a class="dropdown-item" asp-controller="Favorites" asp-action="Index">⭐ My Favorites</a></li>
-                                <li><a class="dropdown-item" asp-controller="Notes" asp-action="Index">📝 My Notes</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                                        <button type="submit" class="dropdown-item text-danger">Logout 🚪</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn-signup" asp-controller="Account" asp-action="Register">Sign Up</a>
-                        </li>
-                    }
-                </ul>
+        </div>
+
+        <!-- Mobile drawer -->
+        <div class="mobile-drawer" id="mobileDrawer">
+            <div class="mobile-search-wrap">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" placeholder="Search recipes…" />
             </div>
+            <a class="mobile-nav-link" asp-controller="Home" asp-action="Index">🏠 Home</a>
+            <a class="mobile-nav-link" asp-controller="Recipe" asp-action="Index">🍽 Browse Recipes</a>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a class="mobile-nav-link" asp-controller="Favorites" asp-action="Index">⭐ My Favorites</a>
+                <a class="mobile-nav-link" asp-controller="Notes" asp-action="Index">📝 My Notes</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" class="mt-2">
+                    <button type="submit" class="btn-nav-join w-100 justify-content-center" style="background:#c0392b;">🚪 Logout</button>
+                </form>
+            }
+            else
+            {
+                <div class="mobile-auth">
+                    <a class="btn-nav-login" asp-controller="Account" asp-action="Login">Login</a>
+                    <a class="btn-nav-join" asp-controller="Account" asp-action="Register">Join the Kitchen</a>
+                </div>
+            }
         </div>
     </nav>
 </header>
@@ -163,15 +608,32 @@
     </main>
 </div>
 
-<footer class="border-top footer py-4 mt-auto">
-    <div class="container text-center">
-        <p class="mb-0 text-muted">&copy; 2026 - <strong>RecipeFinder</strong></p>
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; 2026 — <strong>Cook & Connect</strong></p>
     </div>
 </footer>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+
+<script>
+    // Scroll shadow
+    const mainNav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+        mainNav.classList.toggle('scrolled', window.scrollY > 8);
+    }, { passive: true });
+
+    // Mobile drawer
+    function toggleMobileNav() {
+        const toggle = document.getElementById('navToggle');
+        const drawer = document.getElementById('mobileDrawer');
+        toggle.classList.toggle('open');
+        drawer.classList.toggle('open');
+    }
+</script>
+
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
