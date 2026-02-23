@@ -4,50 +4,578 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Create a New Account</h2>
-        <hr />
-        
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            
-            <div class="mb-3">
-                <label asp-for="FirstName" class="form-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
-                <label asp-for="LastName" class="form-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Register</button>
-        </form>
-        
-        <div class="mt-3">
-            <p>Already have an account? <a asp-action="Login">Log in here</a></p>
+<style>
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background-color: #f9f5ef;
+        color: #1a1a1a;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── PAGE LAYOUT ─── */
+    .page-shell {
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 0 2rem 4rem;
+    }
+
+    /* ─── HERO BANNER ─── */
+    .page-hero {
+        position: relative;
+        padding: 1.75rem 0 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        border-bottom: 1px solid #c5bdb4;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+
+    .page-hero::before {
+        content: 'JOIN US';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(48px, 8vw, 110px);
+        font-weight: 300;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(139, 127, 116, 0.12);
+        white-space: nowrap;
+        pointer-events: none;
+        letter-spacing: 0.08em;
+        user-select: none;
+    }
+
+    .hero-title-group {
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero-eyebrow {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #e85d26;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-eyebrow::before {
+        content: '';
+        display: block;
+        width: 32px;
+        height: 1px;
+        background: #e85d26;
+    }
+
+    .hero-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+        font-weight: 300;
+        line-height: 1;
+        color: #1a1a1a;
+        letter-spacing: -0.02em;
+    }
+
+    .hero-title em {
+        font-style: italic;
+        color: #e85d26;
+    }
+
+    .hero-meta {
+        position: relative;
+        z-index: 1;
+        text-align: right;
+    }
+
+    /* ─── MAIN LAYOUT SPLIT ─── */
+    .content-layout {
+        display: grid;
+        grid-template-columns: 1fr 480px;
+        gap: 5rem;
+        align-items: start;
+    }
+
+    /* ─── LEFT PANEL ─── */
+    .register-promo {
+        position: sticky;
+        top: 2rem;
+        padding-top: 1rem;
+    }
+
+    .promo-tagline {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 4vw, 3.4rem);
+        font-weight: 300;
+        line-height: 1.15;
+        color: #1a1a1a;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.5rem;
+    }
+
+    .promo-tagline em {
+        font-style: italic;
+        color: #e85d26;
+    }
+
+    .promo-desc {
+        font-size: 0.95rem;
+        color: #8a7f74;
+        line-height: 1.7;
+        max-width: 420px;
+        margin-bottom: 2.5rem;
+    }
+
+    .promo-benefits {
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+    }
+
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .benefit-icon {
+        width: 36px;
+        height: 36px;
+        background: #fef0e8;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    .benefit-icon svg {
+        width: 16px;
+        height: 16px;
+        stroke: #e85d26;
+        fill: none;
+    }
+
+    .benefit-text strong {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.2rem;
+    }
+
+    .benefit-text span {
+        font-size: 0.8rem;
+        color: #8a7f74;
+        line-height: 1.5;
+    }
+
+    .promo-divider {
+        height: 1px;
+        background: linear-gradient(to right, #c5bdb4, transparent);
+        margin: 2.5rem 0;
+    }
+
+    .promo-login-cta {
+        font-size: 0.85rem;
+        color: #8a7f74;
+    }
+
+    .promo-login-cta a {
+        color: #e85d26;
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(232, 93, 38, 0.3);
+        transition: border-color 0.2s;
+    }
+
+    .promo-login-cta a:hover {
+        border-color: #e85d26;
+    }
+
+    /* ─── REGISTER FORM PANEL ─── */
+    .register-panel {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(197, 189, 180, 0.5);
+        padding: 2.5rem;
+        animation: cardReveal 0.5s ease both;
+    }
+
+    @@keyframes cardReveal {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f0e9dc;
+    }
+
+    .panel-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #e85d26;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .panel-eyebrow::before {
+        content: '';
+        display: block;
+        width: 22px;
+        height: 1px;
+        background: #e85d26;
+    }
+
+    .panel-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.7rem;
+        font-weight: 400;
+        color: #1a1a1a;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+    }
+
+    /* ─── VALIDATION SUMMARY ─── */
+    .validation-summary {
+        background: #fef0e8;
+        border: 1px solid rgba(232, 93, 38, 0.2);
+        border-radius: 10px;
+        padding: 0.9rem 1.1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.82rem;
+        color: #c0390b;
+    }
+
+    .validation-summary ul {
+        padding-left: 1.2rem;
+        margin: 0;
+    }
+
+    /* ─── FORM ROWS ─── */
+    .form-row-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-label-styled {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #8a7f74;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input-styled {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #c5bdb4;
+        border-radius: 8px;
+        background: #f9f5ef;
+        color: #1a1a1a;
+        font-size: 0.9rem;
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 400;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        appearance: none;
+    }
+
+    .form-input-styled:focus {
+        outline: none;
+        border-color: #e85d26;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(232, 93, 38, 0.1);
+    }
+
+    .form-input-styled:hover:not(:focus) {
+        border-color: #8a7f74;
+    }
+
+    .form-input-styled.input-error {
+        border-color: #c0390b;
+        background: #fff8f6;
+    }
+
+    .field-error {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.75rem;
+        color: #c0390b;
+        font-weight: 500;
+    }
+
+    .input-hint {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.72rem;
+        color: #c5bdb4;
+    }
+
+    .form-divider {
+        height: 1px;
+        background: #f0e9dc;
+        margin: 1.5rem 0;
+    }
+
+    /* ─── SUBMIT BUTTON ─── */
+    .btn-register {
+        width: 100%;
+        padding: 0.9rem;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.6rem;
+    }
+
+    .btn-register svg {
+        width: 15px;
+        height: 15px;
+        stroke: currentColor;
+        fill: none;
+        transition: transform 0.2s;
+    }
+
+    .btn-register:hover {
+        background: #e85d26;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(232, 93, 38, 0.25);
+    }
+
+    .btn-register:hover svg {
+        transform: translateX(3px);
+    }
+
+    .btn-register:active {
+        transform: translateY(0);
+    }
+
+    .panel-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #f0e9dc;
+        text-align: center;
+        font-size: 0.82rem;
+        color: #8a7f74;
+    }
+
+    .panel-footer a {
+        color: #e85d26;
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(232, 93, 38, 0.3);
+        transition: border-color 0.2s;
+    }
+
+    .panel-footer a:hover {
+        border-color: #e85d26;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @@media (max-width: 1100px) {
+        .content-layout {
+            grid-template-columns: 1fr 420px;
+            gap: 3rem;
+        }
+    }
+
+    @@media (max-width: 860px) {
+        .content-layout {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .register-promo {
+            position: relative;
+            top: 0;
+        }
+
+        .promo-tagline {
+            font-size: 2rem;
+        }
+
+        .page-hero::before {
+            display: none;
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .page-shell {
+            padding: 0 1rem 3rem;
+        }
+
+        .register-panel {
+            padding: 1.75rem 1.25rem;
+        }
+
+        .form-row-split {
+            grid-template-columns: 1fr;
+        }
+
+        .page-hero {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="page-shell">
+
+    <!-- ── HERO ── -->
+    <div class="page-hero">
+        <div class="hero-title-group">
+            <div class="hero-eyebrow">New Account</div>
+            <h1 class="hero-title">Create &amp; <em>Explore</em></h1>
         </div>
+        <div class="hero-meta"></div>
+    </div>
+
+    <div class="content-layout">
+
+        <!-- ── LEFT PROMO PANEL ── -->
+        <aside class="register-promo">
+            <p class="promo-tagline">Your personal <em>recipe</em> collection starts here.</p>
+            <p class="promo-desc">Join thousands of home cooks who save, organize, and discover recipes every day. Free forever — no credit card required.</p>
+
+            <div class="promo-benefits">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <strong>Save Favourites</strong>
+                        <span>Bookmark any recipe to your personal collection in one click.</span>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <strong>Rate &amp; Review</strong>
+                        <span>Share your thoughts and help the community discover great dishes.</span>
+                    </div>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div class="benefit-text">
+                        <strong>Personalised Feed</strong>
+                        <span>Get recipe suggestions tailored to your cuisine preferences and diet.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="promo-divider"></div>
+            <p class="promo-login-cta">Already have an account? <a asp-action="Login">Sign in here →</a></p>
+        </aside>
+
+        <!-- ── REGISTER FORM PANEL ── -->
+        <main>
+            <div class="register-panel">
+                <div class="panel-header">
+                    <div class="panel-eyebrow">Step 1 of 1</div>
+                    <h2 class="panel-title">Create your account</h2>
+                </div>
+
+                <form asp-action="Register" method="post" novalidate>
+                    <div asp-validation-summary="All" class="validation-summary text-danger"></div>
+
+                    <div class="form-row-split">
+                        <div class="form-group">
+                            <label asp-for="FirstName" class="form-label-styled"></label>
+                            <input asp-for="FirstName" class="form-input-styled" placeholder="Jane" />
+                            <span asp-validation-for="FirstName" class="field-error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="LastName" class="form-label-styled"></label>
+                            <input asp-for="LastName" class="form-input-styled" placeholder="Smith" />
+                            <span asp-validation-for="LastName" class="field-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email" class="form-label-styled"></label>
+                        <input asp-for="Email" class="form-input-styled" placeholder="jane@example.com" type="email" />
+                        <span asp-validation-for="Email" class="field-error"></span>
+                    </div>
+
+                    <div class="form-divider"></div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="form-label-styled"></label>
+                        <input asp-for="Password" class="form-input-styled" type="password" placeholder="••••••••" />
+                        <span class="input-hint">Minimum 8 characters recommended.</span>
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword" class="form-label-styled"></label>
+                        <input asp-for="ConfirmPassword" class="form-input-styled" type="password" placeholder="••••••••" />
+                        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                    </div>
+
+                    <button type="submit" class="btn-register">
+                        Create Account
+                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <div class="panel-footer">
+                    Already have an account? <a asp-action="Login">Log in here</a>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
 
