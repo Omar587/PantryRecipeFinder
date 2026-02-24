@@ -4,39 +4,452 @@
     ViewData["Title"] = "Login";
 }
 
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2>Log In</h2>
-        <hr />
-        
-        <form asp-action="Login" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
+<style>
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background-color: #f9f5ef;
+        color: #1a1a1a;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .login-shell {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+    }
+
+    .login-shell::before {
+        content: '';
+        position: fixed;
+        top: -200px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 700px;
+        height: 500px;
+        background: radial-gradient(ellipse at center, rgba(232, 93, 38, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* ─── WORDMARK ─── */
+    .site-wordmark {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 3rem;
+        text-decoration: none;
+    }
+
+    .wordmark-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #e85d26;
+        flex-shrink: 0;
+    }
+
+    .wordmark-text {
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #8a7f74;
+    }
+
+    /* ─── CARD ─── */
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        animation: rise 0.45s ease both;
+    }
+
+    @@keyframes rise {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── HEADER ─── */
+    .card-header {
+        margin-bottom: 2.25rem;
+        text-align: center;
+    }
+
+    .card-header-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #e85d26;
+        margin-bottom: 0.75rem;
+    }
+
+    .card-header-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 2.4rem;
+        font-weight: 300;
+        color: #1a1a1a;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.6rem;
+    }
+
+    .card-header-title em {
+        font-style: italic;
+        color: #e85d26;
+    }
+
+    .card-header-sub {
+        font-size: 0.83rem;
+        color: #b0a598;
+    }
+
+    /* ─── WARM DIVIDER ─── */
+    .warm-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .warm-divider-line {
+        width: 40px;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #d9cfc4);
+    }
+
+    .warm-divider-line:last-child {
+        background: linear-gradient(to left, transparent, #d9cfc4);
+    }
+
+    .warm-divider-icon {
+        width: 20px;
+        height: 20px;
+        stroke: #c5bdb4;
+        fill: none;
+        flex-shrink: 0;
+    }
+
+    /* ─── VALIDATION SUMMARY ─── */
+    .validation-summary:empty {
+        display: none;
+    }
+
+    .validation-summary {
+        background: #fef0e8;
+        border: 1px solid rgba(232, 93, 38, 0.2);
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.81rem;
+        color: #c0390b;
+    }
+
+    .validation-summary ul {
+        padding-left: 1.2rem;
+        margin: 0;
+    }
+
+    /* ─── FIELDS ─── */
+    .form-group {
+        margin-bottom: 1.1rem;
+        position: relative;
+    }
+
+    .form-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.45rem;
+    }
+
+    .form-label-styled {
+        display: block;
+        font-size: 0.67rem;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #a09589;
+    }
+
+    .form-input-styled {
+        width: 100%;
+        padding: 0.78rem 1rem;
+        border: 1px solid #ddd5c8;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #1a1a1a;
+        font-size: 0.9rem;
+        font-family: 'DM Sans', sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        appearance: none;
+    }
+
+    .form-input-styled:focus {
+        outline: none;
+        border-color: #e85d26;
+        box-shadow: 0 0 0 3px rgba(232, 93, 38, 0.09);
+    }
+
+    .form-input-styled:hover:not(:focus) {
+        border-color: #b0a598;
+    }
+
+    /* password field needs right padding for the toggle button */
+    .password-wrapper {
+        position: relative;
+    }
+
+    .password-wrapper .form-input-styled {
+        padding-right: 3rem;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 0.9rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        color: #b0a598;
+        transition: color 0.2s;
+    }
+
+    .password-toggle:hover {
+        color: #e85d26;
+    }
+
+    .password-toggle svg {
+        width: 17px;
+        height: 17px;
+        stroke: currentColor;
+        fill: none;
+        pointer-events: none;
+    }
+
+    .icon-eye-off {
+        display: none;
+    }
+
+    .field-error {
+        display: block;
+        margin-top: 0.3rem;
+        font-size: 0.74rem;
+        color: #c0390b;
+        font-weight: 500;
+    }
+
+    /* ─── REMEMBER ROW ─── */
+    .remember-row {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 1.25rem 0 1.6rem;
+    }
+
+    .remember-checkbox {
+        width: 15px;
+        height: 15px;
+        accent-color: #e85d26;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .remember-label {
+        font-size: 0.79rem;
+        color: #a09589;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    /* ─── SUBMIT ─── */
+    .btn-login {
+        width: 100%;
+        padding: 0.88rem;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.81rem;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+    }
+
+    .btn-login svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        transition: transform 0.2s;
+    }
+
+    .btn-login:hover {
+        background: #e85d26;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(232, 93, 38, 0.22);
+    }
+
+    .btn-login:hover svg {
+        transform: translateX(3px);
+    }
+
+    .btn-login:active {
+        transform: translateY(0);
+    }
+
+    /* ─── FOOTER ─── */
+    .card-footer {
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 0.81rem;
+        color: #b0a598;
+    }
+
+    .card-footer a {
+        color: #e85d26;
+        font-weight: 600;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(232, 93, 38, 0.3);
+        transition: border-color 0.2s;
+    }
+
+    .card-footer a:hover {
+        border-color: #e85d26;
+    }
+
+    .page-tagline {
+        margin-top: 3.5rem;
+        text-align: center;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 0.95rem;
+        font-style: italic;
+        font-weight: 300;
+        color: #c5bdb4;
+        letter-spacing: 0.02em;
+    }
+
+    @@media (max-width: 480px) {
+        .card-header-title { font-size: 2rem; }
+        .login-shell { padding: 2rem 1rem; }
+    }
+</style>
+
+<div class="login-shell">
+
+    <a class="site-wordmark" asp-action="Index" asp-controller="Home">
+        <div class="wordmark-dot"></div>
+        <span class="wordmark-text">RecipeFinder</span>
+    </a>
+
+    <div class="login-card">
+
+        <div class="card-header">
+            <p class="card-header-eyebrow">Welcome back</p>
+            <h1 class="card-header-title">Good to see<br>you <em>again</em>.</h1>
+            <p class="card-header-sub">Sign in to your collection.</p>
+        </div>
+
+        <div class="warm-divider">
+            <div class="warm-divider-line"></div>
+            <svg class="warm-divider-icon" viewBox="0 0 24 24" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2a9 9 0 0 1 9 9c0 4.17-2.84 8.33-8.5 11.5a1 1 0 0 1-1 0C5.84 19.33 3 15.17 3 11a9 9 0 0 1 9-9z"/>
+                <circle cx="12" cy="11" r="3"/>
+            </svg>
+            <div class="warm-divider-line"></div>
+        </div>
+
+        <form asp-action="Login" method="post" novalidate>
+            <div asp-validation-summary="All" class="validation-summary text-danger"></div>
+
+            <div class="form-group">
+                <div class="form-label-row">
+                    <label asp-for="Email" class="form-label-styled"></label>
+                </div>
+                <input asp-for="Email" class="form-input-styled" placeholder="jane@example.com"
+                       type="email" autocomplete="email" autofocus />
+                <span asp-validation-for="Email" class="field-error"></span>
             </div>
-            
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+
+            <div class="form-group">
+                <div class="form-label-row">
+                    <label asp-for="Password" class="form-label-styled"></label>
+                </div>
+                <div class="password-wrapper">
+                    <input asp-for="Password" class="form-input-styled" type="password"
+                           placeholder="••••••••" autocomplete="current-password" id="password-field" />
+                    <button type="button" class="password-toggle" id="password-toggle" aria-label="Toggle password visibility">
+                        <!-- Eye icon (visible when password is hidden) -->
+                        <svg class="icon-eye" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <!-- Eye-off icon (visible when password is shown) -->
+                        <svg class="icon-eye-off" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="field-error"></span>
             </div>
-            
-            <div class="mb-3 form-check">
-                <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label"></label>
+
+            <div class="remember-row">
+                <input asp-for="RememberMe" class="remember-checkbox" type="checkbox" />
+                <label asp-for="RememberMe" class="remember-label">Keep me signed in</label>
             </div>
-            
-            <button type="submit" class="btn btn-primary">Log In</button>
+
+            <button type="submit" class="btn-login">
+                Sign In
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </button>
         </form>
-        
-        <div class="mt-3">
-            <p>Don't have an account? <a asp-action="Register">Register here</a></p>
+
+        <div class="card-footer">
+            Don't have an account? <a asp-action="Register">Create one here →</a>
         </div>
     </div>
+
+    <p class="page-tagline">"Great cooking starts with great ingredients."</p>
+
 </div>
+
+<script>
+    const toggle = document.getElementById('password-toggle');
+    const field  = document.getElementById('password-field');
+    const eyeOn  = toggle.querySelector('.icon-eye');
+    const eyeOff = toggle.querySelector('.icon-eye-off');
+
+    toggle.addEventListener('click', () => {
+        const isHidden = field.type === 'password';
+        field.type     = isHidden ? 'text' : 'password';
+        eyeOn.style.display  = isHidden ? 'none'  : '';
+        eyeOff.style.display = isHidden ? ''      : 'none';
+    });
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

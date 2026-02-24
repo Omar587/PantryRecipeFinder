@@ -25,4 +25,16 @@ public class DatabaseHelper
         return await _context.SaveChangesAsync();
         
     }
+
+    public List<Ingredient>  GetRecipeIngridients(int recipeId)
+    {
+        var ingridients = _context.Ingredients
+            .Where(r => recipeId == r.RecipeId).ToList();
+
+        return  ingridients;
+    }
+    
+        
+    
+    
 }
