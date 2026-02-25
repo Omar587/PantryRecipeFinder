@@ -32,5 +32,7 @@ public class Recipe
     public List<FavoriteRecipe> FavoritedBy { get; set; } = new();
     public List<RecipeRating> Ratings { get; set; } = new();
     public List<RecipeNote> Notes { get; set; } = new();
+    public List<RecipeInstructions> Instructions { get; set; } = new();
+    
     
 }
