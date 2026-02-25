@@ -101,6 +101,7 @@ public class RecipeController : Controller
             .Include(r => r.Tags)
             .Include(r => r.Ratings)
             .Include(r => r.Notes)
+            .Include(r => r.Instructions)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (recipe == null)

@@ -7,530 +7,676 @@
     var userId = 0;
     var userRating = 0;
     RecipeNote userNote = null;
-    
+
     if (SignInManager.IsSignedIn(User))
     {
         var user = await UserManager.GetUserAsync(User);
         userId = user.Id;
         userNote = Model.Notes?.FirstOrDefault(n => n.CustomerId == userId);
-        // Get this user's existing rating so we can pre-fill the stars
         var existingRating = Model.Ratings?.FirstOrDefault(r => r.CustomerId == userId);
         userRating = existingRating?.Rating ?? 0;
     }
+
+    var hasInstructions = Model.Instructions != null && Model.Instructions.Any();
+    var sortedInstructions = hasInstructions
+        ? Model.Instructions.OrderBy(i => i.StepNumber).ToList()
+        : new List<RecipeInstructions>();
 }
 
 <style>
+    /* ─── Base ───────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
         background: #FFF8F0;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        color: #3E2723;
+        -webkit-font-smoothing: antialiased;
     }
 
+    /* ─── Hero ───────────────────────────────────────────────────────────────── */
     .recipe-hero {
         position: relative;
-        height: 60vh;
+        height: 62vh;
         min-height: 400px;
         overflow: hidden;
-        border-radius: 0 0 40px 40px;
-        margin: -1rem -1rem 3rem -1rem;
+        border-radius: 0 0 44px 44px;
+        margin: -1rem -1rem 0 -1rem;
     }
 
     .recipe-hero-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        object-position: center 50%;
-        filter: brightness(0.7);
+        object-position: center 45%;
+        filter: brightness(0.62) saturate(1.1);
+        transition: transform 7s ease;
+        will-change: transform;
     }
 
-    .recipe-hero-overlay {
+    .recipe-hero:hover .recipe-hero-image {
+        transform: scale(1.04);
+    }
+
+    .hero-gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to top,
+            rgba(30,14,8,0.97) 0%,
+            rgba(30,14,8,0.55) 38%,
+            transparent 65%
+        );
+    }
+
+    .hero-content {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(to top, rgba(62, 39, 35, 0.95), transparent);
-        padding: 3rem 0 2rem;
-        color: white;
+        padding: 2.5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeUp 0.55s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    /* centres hero-content inside the hero when max-width kicks in */
+    .recipe-hero > .hero-content {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
     }
 
     .recipe-title {
-        font-family: 'Georgia', serif;
-        font-size: 3rem;
-        font-weight: 600;
+        font-size: clamp(1.9rem, 5vw, 3.4rem);
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.1;
         margin-bottom: 1rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: -0.3px;
+        text-shadow: 0 2px 24px rgba(0,0,0,0.45);
     }
-    
+
     .recipe-meta {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 0.6rem;
         flex-wrap: wrap;
     }
-    
-    .badge-warm {
-        background: #E67E22;
-        color: white;
-        padding: 0.5rem 1.25rem;
-        border-radius: 25px;
-        font-weight: 500;
-        font-size: 0.95rem;
-        box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
-    }
-    
-    .rating-badge {
-        background: rgba(255, 255, 255, 0.95);
-        color: #3E2723;
-        padding: 0.5rem 1.25rem;
-        border-radius: 25px;
-        font-weight: 600;
-        display: flex;
+
+    .badge {
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: all 0.4s ease;
+        gap: 0.35rem;
+        padding: 0.42rem 1.05rem;
+        border-radius: 999px;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 0.82rem;
+        font-weight: 600;
+        letter-spacing: 0.25px;
+        white-space: nowrap;
     }
-    
-    .rating-star {
-        color: #F39C12;
-        font-size: 1.2rem;
+
+    .badge-sienna { background: #E67E22; color: #fff; }
+
+    .badge-rating {
+        background: rgba(255,255,255,0.95);
+        color: #3E2723;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 2px 12px rgba(62,39,35,0.07);
     }
-    
+
+    .badge-rating .star { color: #F39C12; }
+
+    /* ─── Back Button ────────────────────────────────────────────────────────── */
     .back-button {
         position: absolute;
-        top: 2rem;
-        left: 2rem;
-        background: rgba(255, 255, 255, 0.95);
+        top: 1.5rem;
+        left: 1.75rem;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: rgba(255,255,255,0.92);
         color: #3E2723;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 30px;
-        text-decoration: none;
+        padding: 0.6rem 1.3rem;
+        border-radius: 999px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.88rem;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(139, 69, 19, 0.1);
-        transition: all 0.3s ease;
-        z-index: 10;
+        text-decoration: none;
+        box-shadow: 0 2px 12px rgba(62,39,35,0.07);
+        backdrop-filter: blur(10px);
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     .back-button:hover {
-        background: white;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(139, 69, 19, 0.1);
+        background: #fff;
         color: #E67E22;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 24px rgba(62,39,35,0.11);
     }
-    
+
+    /* ─── Layout ─────────────────────────────────────────────────────────────── */
     .content-wrapper {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 0 2rem;
+        padding: 2.5rem 2rem 4rem;
     }
-    
-    .recipe-grid {
+
+    .page-grid {
         display: grid;
-        grid-template-columns: 1fr 1.5fr;
-        gap: 2.5rem;
-        margin-bottom: 3rem;
+        grid-template-columns: 320px 1fr;
+        gap: 2rem;
+        align-items: start;
     }
-    
-    .card-warm {
-        background: white;
+
+    /* ─── Cards ──────────────────────────────────────────────────────────────── */
+    .card {
+        background: #fff;
         border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(139, 69, 19, 0.1);
-        transition: transform 0.3s ease;
+        padding: 1.75rem;
+        box-shadow: 0 2px 12px rgba(62,39,35,0.07);
+        border: 1px solid rgba(245,230,211,0.6);
+        transition: box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .card-warm:hover {
-        transform: translateY(-4px);
+
+    .card:hover {
+        box-shadow: 0 4px 24px rgba(62,39,35,0.11);
     }
-    
+
     .section-title {
-        font-family: 'Georgia', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
         color: #3E2723;
-        font-size: 1.75rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.65rem;
     }
-    
+
     .section-title::before {
         content: '';
+        display: block;
         width: 4px;
-        height: 2rem;
+        height: 1.3rem;
         background: #E67E22;
         border-radius: 2px;
+        flex-shrink: 0;
     }
-    
-    .quick-info-grid {
+
+    /* ─── Quick Info Grid ────────────────────────────────────────────────────── */
+    .info-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.25rem;
-        margin-bottom: 2rem;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+        margin-bottom: 1.5rem;
     }
-    
+
     .info-box {
         background: linear-gradient(135deg, #F5E6D3 0%, #FFF8F0 100%);
-        padding: 1.5rem;
-        border-radius: 16px;
+        border: 1px solid rgba(230,126,34,0.12);
+        border-radius: 12px;
+        padding: 1.1rem 0.75rem;
         text-align: center;
-        border: 2px solid rgba(230, 126, 34, 0.1);
     }
-    
+
     .info-box-value {
-        font-size: 2rem;
+        display: block;
+        font-size: 1.75rem;
         font-weight: 700;
         color: #E67E22;
-        display: block;
-        margin-bottom: 0.25rem;
+        line-height: 1;
+        margin-bottom: 0.3rem;
     }
-    
+
     .info-box-label {
-        color: #8B4513;
-        font-size: 0.9rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .action-section {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-    
-    .favorite-button {
-        background: linear-gradient(135deg, #E67E22 0%, #D4845F 100%);
-        color: white;
-        border: none;
-        padding: 1rem 2rem;
-        border-radius: 50px;
-        font-size: 1.1rem;
+        font-family: system-ui, sans-serif;
+        font-size: 0.72rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+        color: #8B4513;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+    }
+
+    /* ─── Favorite Button ────────────────────────────────────────────────────── */
+    .favorite-btn {
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.75rem;
+        gap: 0.65rem;
+        padding: 0.9rem 1.5rem;
+        border: none;
+        border-radius: 999px;
+        font-family: system-ui, sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(135deg, #E67E22 0%, #D4845F 100%);
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(230,126,34,0.28);
     }
-    
-    .favorite-button:hover {
+
+    .favorite-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+        box-shadow: 0 6px 22px rgba(230,126,34,0.38);
     }
-    
-    .favorite-button.favorited {
+
+    .favorite-btn:active { transform: translateY(0); }
+
+    .favorite-btn.favorited {
         background: linear-gradient(135deg, #C0392B 0%, #E74C3C 100%);
+        box-shadow: 0 4px 16px rgba(192,57,43,0.28);
     }
-    
-    .rating-section {
+
+    /* ─── Star Rating ────────────────────────────────────────────────────────── */
+    .rating-card {
         background: linear-gradient(135deg, #FFF8F0 0%, #FFE8D6 100%);
-        padding: 1.5rem;
-        border-radius: 16px;
-        border: 2px solid rgba(230, 126, 34, 0.15);
+        border: 1.5px solid rgba(230,126,34,0.15);
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+        text-align: center;
     }
-    
-    .rating-title {
-        font-size: 1.1rem;
+
+    .rating-card-title {
+        font-family: system-ui, sans-serif;
+        font-size: 0.88rem;
         font-weight: 600;
         color: #3E2723;
-        margin-bottom: 1rem;
-        text-align: center;
+        margin-bottom: 0.85rem;
     }
-    
-    .star-rating {
+
+    .star-row {
         display: flex;
         justify-content: center;
-        gap: 0.5rem;
-        font-size: 2.5rem;
+        gap: 0.3rem;
+        font-size: 2.2rem;
         margin-bottom: 0.5rem;
+        line-height: 1;
     }
-    
-    .star-rating span {
-        color: #E0E0E0;
+
+    .star-row span {
+        color: #DDD;
         cursor: pointer;
-        transition: all 0.2s ease;
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        transition: color 0.15s, transform 0.15s;
         user-select: none;
-    }
-    
-    .star-rating span:hover,
-    .star-rating span.hovered {
-        color: #F39C12;
-        transform: scale(1.15);
+        display: inline-block;
     }
 
-    /* Filled means the user has submitted this rating */
-    .star-rating span.filled {
-        color: #F39C12;
-    }
-    
-    .rating-message {
-        text-align: center;
+    .star-row span.filled  { color: #F39C12; }
+    .star-row span.hovered { color: #F39C12; transform: scale(1.18); }
+
+    .rating-msg {
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
         color: #8B4513;
-        font-size: 0.9rem;
-        min-height: 1.5rem;
-        transition: opacity 0.3s ease;
+        min-height: 1.2rem;
+        transition: color 0.2s;
     }
 
-    .rating-message.success {
-        color: #27AE60;
-        font-weight: 600;
-    }
+    .rating-msg.success { color: #27AE60; font-weight: 600; }
+    .rating-msg.error   { color: #C0392B; }
 
-    .rating-message.error {
-        color: #C0392B;
-    }
-    
+    /* ─── Login Prompt ───────────────────────────────────────────────────────── */
     .login-prompt {
-        background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-        padding: 1.5rem;
-        border-radius: 16px;
+        background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
         border-left: 4px solid #4CAF50;
+        border-radius: 12px;
+        padding: 1.1rem 1.25rem;
         color: #2E7D32;
+        font-family: system-ui, sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .login-prompt a { color: #1B5E20; font-weight: 600; }
+
+    /* ─── Tabs ───────────────────────────────────────────────────────────────── */
+    .tab-bar {
+        display: flex;
+        gap: 0;
+        border-bottom: 2px solid #F5E6D3;
         margin-bottom: 1.5rem;
     }
-    
-    .login-prompt a {
-        color: #1B5E20;
+
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-family: system-ui, sans-serif;
+        font-size: 0.95rem;
         font-weight: 600;
-        text-decoration: underline;
+        color: #8B4513;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+        white-space: nowrap;
     }
-    
+
+    .tab-btn::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #E67E22;
+        border-radius: 2px 2px 0 0;
+        transform: scaleX(0);
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .tab-btn.active { color: #E67E22; }
+    .tab-btn.active::after { transform: scaleX(1); }
+    .tab-btn:hover { color: #E67E22; }
+
+    .tab-panel { display: none; animation: fadeIn 0.25s ease; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Ingredient List ────────────────────────────────────────────────────── */
+    .ingredient-list { list-style: none; }
+
     .ingredient-item {
         display: flex;
         align-items: flex-start;
-        padding: 1rem 0;
+        gap: 0.9rem;
+        padding: 0.85rem 0;
         border-bottom: 1px solid #F5E6D3;
-        gap: 1rem;
     }
-    
-    .ingredient-item:last-child {
-        border-bottom: none;
-    }
-    
+
+    .ingredient-item:last-child { border-bottom: none; }
+
     .ingredient-check {
-        color: #E67E22;
-        font-size: 1.5rem;
-        font-weight: 700;
         flex-shrink: 0;
-        margin-top: 0.25rem;
-    }
-    
-    .ingredient-content {
-        flex: 1;
-    }
-    
-    .ingredient-amount {
-        color: #E67E22;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #E67E22, #D4845F);
+        color: #fff;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.15rem;
         font-weight: 700;
-        margin-right: 0.5rem;
     }
-    
-    .ingredient-name {
+
+    .ingredient-amount {
+        font-weight: 700;
+        color: #E67E22;
+        margin-right: 0.25rem;
+    }
+
+    .ingredient-name { color: #3E2723; }
+
+    .ingredient-category {
+        font-family: system-ui, sans-serif;
+        font-size: 0.75rem;
+        color: #8B4513;
+        background: #F5E6D3;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        margin-left: 0.4rem;
+        white-space: nowrap;
+    }
+
+    /* ─── Instructions List ──────────────────────────────────────────────────── */
+    .instructions-list { list-style: none; counter-reset: steps; }
+
+    .instruction-item {
+        display: flex;
+        gap: 1.25rem;
+        padding: 1.4rem 0;
+        border-bottom: 1px solid #F5E6D3;
+        animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+    }
+
+    .instruction-item:last-child { border-bottom: none; }
+
+    .step-number {
+        flex-shrink: 0;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 50%;
+        background: #3E2723;
+        color: #fff;
+        font-family: system-ui, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.1rem;
+        box-shadow: 0 2px 8px rgba(62,39,35,0.2);
+    }
+
+    .step-text {
+        font-size: 1rem;
+        line-height: 1.7;
         color: #3E2723;
+        padding-top: 0.35rem;
     }
-    
-    .tag-container {
+
+    .instructions-empty {
+        font-family: system-ui, sans-serif;
+        color: #8B4513;
+        text-align: center;
+        padding: 2.5rem 1rem;
+        font-size: 0.95rem;
+        opacity: 0.7;
+    }
+
+    /* ─── Tags ───────────────────────────────────────────────────────────────── */
+    .tag-cloud {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: 0.6rem;
+        padding-top: 0.25rem;
     }
-    
-    .tag-item {
-        background: linear-gradient(135deg, #F5E6D3 0%, #FFF8F0 100%);
-        color: #8B4513;
-        padding: 0.5rem 1.25rem;
-        border-radius: 25px;
-        font-size: 0.9rem;
+
+    .tag-pill {
+        font-family: system-ui, sans-serif;
+        font-size: 0.82rem;
         font-weight: 500;
-        border: 1px solid rgba(230, 126, 34, 0.2);
-        transition: all 0.2s ease;
+        color: #8B4513;
+        background: linear-gradient(135deg, #F5E6D3, #FFF8F0);
+        border: 1px solid rgba(230,126,34,0.18);
+        padding: 0.38rem 1rem;
+        border-radius: 999px;
+        transition: all 0.18s;
+        cursor: default;
     }
-    
-    .tag-item:hover {
+
+    .tag-pill:hover {
         background: #E67E22;
-        color: white;
+        color: #fff;
+        border-color: transparent;
         transform: translateY(-2px);
     }
-    
-    .notes-container {
+
+    /* ─── Notes ──────────────────────────────────────────────────────────────── */
+    .notes-section {
         background: #FFFBEA;
-        padding: 2rem;
-        border-radius: 16px;
+        border: 1.5px solid rgba(243,156,18,0.25);
         border-left: 4px solid #F39C12;
-        margin-top: 2rem;
+        border-radius: 20px;
+        padding: 1.75rem;
+        margin-top: 1.5rem;
     }
-    
+
     .notes-textarea {
         width: 100%;
-        border: 2px solid #F5E6D3;
+        border: 1.5px solid #F5E6D3;
         border-radius: 12px;
-        padding: 1rem;
-        font-family: inherit;
-        font-size: 1rem;
+        padding: 0.9rem 1rem;
+        font-family: 'Georgia', serif;
+        font-size: 0.95rem;
+        line-height: 1.6;
         resize: vertical;
-        transition: border-color 0.3s ease;
-        background: white;
+        background: #fff;
+        color: #3E2723;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-height: 110px;
     }
-    
+
     .notes-textarea:focus {
         outline: none;
         border-color: #E67E22;
-        box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+        box-shadow: 0 0 0 3px rgba(230,126,34,0.1);
     }
-    
-    .save-note-button {
+
+    .save-note-btn {
+        margin-top: 0.85rem;
         background: #E67E22;
-        color: white;
+        color: #fff;
         border: none;
-        padding: 0.75rem 2rem;
-        border-radius: 25px;
+        padding: 0.65rem 1.75rem;
+        border-radius: 999px;
+        font-family: system-ui, sans-serif;
+        font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
-        margin-top: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .save-note-button:hover {
-        background: #8B4513;
-        transform: translateY(-2px);
+
+    .save-note-btn:hover {
+        background: #C96A10;
+        transform: translateY(-1px);
     }
-    
+
     .saved-note-display {
-        background: white;
-        padding: 1.5rem;
+        background: #fff;
+        border: 1.5px dashed #F39C12;
         border-radius: 12px;
+        padding: 1.25rem;
         margin-top: 1rem;
-        border: 2px dashed #F39C12;
     }
-    
+
     .note-text {
+        font-size: 0.97rem;
+        line-height: 1.65;
         color: #3E2723;
-        line-height: 1.6;
-        margin-bottom: 1rem;
+        margin-bottom: 0.85rem;
+        white-space: pre-wrap;
     }
-    
+
     .note-footer {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 0.85rem;
-        color: #8B4513;
-    }
-    
-    .edit-note-button {
-        background: none;
-        border: none;
-        color: #E67E22;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: underline;
-        padding: 0;
-    }
-    
-    .edit-note-button:hover {
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
         color: #8B4513;
     }
 
-    .delete-note-button {
+    .note-action-btn {
         background: none;
         border: none;
-        color: #C0392B;
+        font-family: system-ui, sans-serif;
+        font-size: 0.8rem;
         font-weight: 600;
         cursor: pointer;
-        text-decoration: underline;
         padding: 0;
-        margin-left: 1rem;
+        text-decoration: underline;
     }
 
-    .delete-note-button:hover {
-        color: #E74C3C;
+    .note-action-btn.edit   { color: #E67E22; }
+    .note-action-btn.delete { color: #C0392B; margin-left: 0.85rem; }
+    .note-action-btn:hover  { opacity: 0.75; }
+
+    /* ─── Animations ─────────────────────────────────────────────────────────── */
+    @@keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to   { opacity: 1; transform: translateY(0); }
     }
 
-    .note-footer > div {
-        display: flex;
-        gap: 0.5rem;
+    @@keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
     }
-    
-    @@media (max-width: 968px) {
-        .recipe-grid {
+
+    /* ─── Responsive ─────────────────────────────────────────────────────────── */
+    @@media (max-width: 900px) {
+        .page-grid {
             grid-template-columns: 1fr;
         }
-        
-        .recipe-title {
-            font-size: 2rem;
-        }
-        
-        .quick-info-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
     }
-    
+
     @@media (max-width: 576px) {
-        .quick-info-grid {
-            grid-template-columns: 1fr;
-        }
-        
+        .recipe-title { font-size: 1.8rem; }
+
+        .info-grid { grid-template-columns: 1fr 1fr; }
+
         .back-button {
             top: 1rem;
             left: 1rem;
             padding: 0.5rem 1rem;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
         }
+
+        .tab-btn { padding: 0.65rem 1rem; font-size: 0.88rem; }
     }
 </style>
 
+
+<!-- ═══════════════════════════════════════════════════════════════ HERO ══ -->
 <div class="recipe-hero">
     @{
         var ext = System.IO.Path.GetExtension(Model.ImageUrl).ToLower();
         var retinaUrl = Model.ImageUrl.Replace(ext, $"@2x{ext}");
     }
 
-    <img 
-        src="@Model.ImageUrl" 
-        alt="@Model.Name" 
+    <img
+        src="@Model.ImageUrl"
+        alt="@Model.Name"
         class="recipe-hero-image"
         srcset="@Model.ImageUrl 1x, @retinaUrl 2x"
-        sizes="(max-width: 1200px) 100vw, 1200px"
+        sizes="100vw"
+        loading="eager"
     />
 
-    <a asp-action="Index" class="back-button">← Back to Recipes</a>
-    
-    <div class="recipe-hero-overlay">
-        <div class="container">
-            <h1 class="recipe-title">@Model.Name</h1>
-            <div class="recipe-meta">
-                <span class="badge-warm">@Model.Cuisine</span>
-                <span class="badge-warm">@Model.Difficulty</span>
-                <!-- Live-updated by JS after a rating is submitted -->
-                <div class="rating-badge" id="ratingBadge">
-                    <span class="rating-star">★</span>
-                    <span id="badgeRatingValue">@Model.Rating.ToString("F1")</span>
-                    <small id="badgeRatingCount" style="opacity: 0.7;">(@Model.RatingCount)</small>
-                </div>
-            </div>
+    <div class="hero-gradient"></div>
+
+    <a asp-action="Index" class="back-button">← Recipes</a>
+
+    <div class="hero-content">
+        <h1 class="recipe-title">@Model.Name</h1>
+        <div class="recipe-meta">
+            <span class="badge badge-sienna">@Model.Cuisine</span>
+            <span class="badge badge-sienna">@Model.Difficulty</span>
+            <span class="badge badge-rating" id="ratingBadge">
+                <span class="star">★</span>
+                <span id="badgeRatingValue">@Model.Rating.ToString("F1")</span>
+                <span id="badgeRatingCount" style="opacity:0.65; font-size:0.8em;">(@Model.RatingCount)</span>
+            </span>
         </div>
     </div>
 </div>
 
 
+<!-- ════════════════════════════════════════════════════════════ CONTENT ══ -->
 <div class="content-wrapper">
-    <div class="recipe-grid">
-        <!-- Sidebar: Quick Info & Actions -->
+    <div class="page-grid">
+
+        <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
         <aside>
-            <div class="card-warm">
+            <div class="card">
                 <h3 class="section-title">Quick Info</h3>
-                <div class="quick-info-grid">
+
+                <div class="info-grid">
                     <div class="info-box">
-                        <span class="info-box-value">@Model.PrepTime</span>
-                        <span class="info-box-label">Prep Time</span>
+                        <span class="info-box-value">@Model.PrepTime<small style="font-size:0.9rem;">m</small></span>
+                        <span class="info-box-label">Prep</span>
                     </div>
                     <div class="info-box">
-                        <span class="info-box-value">@Model.CookTime</span>
-                        <span class="info-box-label">Cook Time</span>
+                        <span class="info-box-value">@Model.CookTime<small style="font-size:0.9rem;">m</small></span>
+                        <span class="info-box-label">Cook</span>
                     </div>
                     <div class="info-box">
-                        <span class="info-box-value">@Model.TotalTime()</span>
+                        <span class="info-box-value">@Model.TotalTime()<small style="font-size:0.9rem;">m</small></span>
                         <span class="info-box-label">Total</span>
                     </div>
                     <div class="info-box">
@@ -538,29 +684,30 @@
                         <span class="info-box-label">Servings</span>
                     </div>
                 </div>
-                
+
                 @if (SignInManager.IsSignedIn(User))
                 {
-                    <div class="action-section">
-                        <button class="favorite-button @(ViewBag.IsFavorited == true ? "favorited" : "")" id="favoriteBtn">
-                            <span id="favoriteIcon">♥</span>
-                            <span id="favoriteText">@(ViewBag.IsFavorited == true ? "Saved to Favorites" : "Add to Favorites")</span>
-                        </button>
-                        
-                        <div class="rating-section">
-                            <div class="rating-title" id="ratingTitle">
-                                @(userRating > 0 ? "Your Rating" : "Rate This Recipe")
-                            </div>
-                            <div class="star-rating" id="starRating">
-                                <span data-rating="1">★</span>
-                                <span data-rating="2">★</span>
-                                <span data-rating="3">★</span>
-                                <span data-rating="4">★</span>
-                                <span data-rating="5">★</span>
-                            </div>
-                            <div class="rating-message" id="ratingMessage">
-                                @(userRating > 0 ? $"You rated this {userRating}/5 — click to change" : "")
-                            </div>
+                    <!-- Favorite -->
+                    <button class="favorite-btn @(ViewBag.IsFavorited == true ? "favorited" : "")"
+                            id="favoriteBtn"
+                            aria-label="Toggle favorite">
+                        <span id="favoriteIcon" aria-hidden="true">♥</span>
+                        <span id="favoriteText">@(ViewBag.IsFavorited == true ? "Saved to Favorites" : "Add to Favorites")</span>
+                    </button>
+
+                    <!-- Star Rating -->
+                    <div class="rating-card">
+                        <div class="rating-card-title" id="ratingTitle">
+                            @(userRating > 0 ? "Your Rating" : "Rate This Recipe")
+                        </div>
+                        <div class="star-row" id="starRating" role="group" aria-label="Star rating">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <span data-rating="@s" role="button" aria-label="@s star@(s > 1 ? "s" : "")">★</span>
+                            }
+                        </div>
+                        <div class="rating-msg" id="ratingMessage">
+                            @(userRating > 0 ? $"You rated this {userRating}/5 — click to change" : "")
                         </div>
                     </div>
                 }
@@ -573,75 +720,133 @@
                 }
             </div>
         </aside>
-        
-        <!-- Main Content: Ingredients & Tags -->
+
+        <!-- ── Main ────────────────────────────────────────────────────────── -->
         <main>
-            <div class="card-warm">
-                <h2 class="section-title">Ingredients</h2>
-                <div>
-                    @foreach (var ingredient in Model.Ingredients)
+            <div class="card">
+                <!-- Tab Bar -->
+                <div class="tab-bar" role="tablist">
+                    <button class="tab-btn active"
+                            id="tab-ingredients"
+                            role="tab"
+                            aria-selected="true"
+                            aria-controls="panel-ingredients">
+                        🥕 Ingredients (@Model.Ingredients.Count)
+                    </button>
+                    <button class="tab-btn"
+                            id="tab-instructions"
+                            role="tab"
+                            aria-selected="false"
+                            aria-controls="panel-instructions">
+                        📋 Instructions (@sortedInstructions.Count)
+                    </button>
+                </div>
+
+                <!-- Ingredients Panel -->
+                <div id="panel-ingredients"
+                     class="tab-panel active"
+                     role="tabpanel"
+                     aria-labelledby="tab-ingredients">
+                    <ul class="ingredient-list">
+                        @foreach (var ingredient in Model.Ingredients)
+                        {
+                            <li class="ingredient-item">
+                                <div class="ingredient-check" aria-hidden="true">✓</div>
+                                <div>
+                                    <span class="ingredient-amount">@ingredient.Amount @ingredient.Unit</span>
+                                    <span class="ingredient-name">@ingredient.Name</span>
+                                   
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Instructions Panel -->
+                <div id="panel-instructions"
+                     class="tab-panel"
+                     role="tabpanel"
+                     aria-labelledby="tab-instructions">
+
+                    @if (sortedInstructions.Any())
                     {
-                        <div class="ingredient-item">
-                            <span class="ingredient-check">✓</span>
-                            <div class="ingredient-content">
-                                <span class="ingredient-amount">@ingredient.Amount @ingredient.Unit</span>
-                                <span class="ingredient-name">@ingredient.Name</span>
-                                <span class="ingredient-name">@ingredient.Category</span>
-                            </div>
-                        </div>
+                        <ol class="instructions-list">
+                            @foreach (var step in sortedInstructions)
+                            {
+                                <li class="instruction-item"
+                                    style="animation-delay: @(sortedInstructions.IndexOf(step) * 0.06)s">
+                                    <div class="step-number" aria-label="Step @step.StepNumber">
+                                        @step.StepNumber
+                                    </div>
+                                    <p class="step-text">@step.Instruction</p>
+                                </li>
+                            }
+                        </ol>
+                    }
+                    else
+                    {
+                        <p class="instructions-empty">No instructions have been added for this recipe yet.</p>
                     }
                 </div>
             </div>
+
             
+            <!-- Tags -->
             @if (Model.Tags.Any())
             {
-                <div class="card-warm" style="margin-top: 2rem;">
+                <div class="card" style="margin-top: 1.5rem;">
                     <h3 class="section-title">Tags</h3>
-                    <div class="tag-container">
+                    <div class="tag-cloud">
                         @foreach (var tag in Model.Tags)
                         {
-                            <span class="tag-item">#@tag.Name</span>
+                            <span class="tag-pill">#@tag.Name</span>
                         }
                     </div>
                 </div>
             }
-            
+
+            <!-- Personal Notes (auth only) -->
             @if (SignInManager.IsSignedIn(User))
             {
-                <div class="notes-container">
+                <div class="notes-section">
                     <h3 class="section-title">My Personal Notes</h3>
-        
+
                     @if (userNote != null)
                     {
+                        <!-- Saved state -->
                         <div id="savedNote" class="saved-note-display">
                             <p class="note-text" id="noteContent">@userNote.NoteText</p>
                             <div class="note-footer">
                                 <small id="noteDate">
-                                    Saved on @((userNote.UpdatedAt ?? userNote.CreatedAt).ToLocalTime().ToString("MMMM dd, yyyy"))
+                                    Saved @((userNote.UpdatedAt ?? userNote.CreatedAt).ToLocalTime().ToString("MMMM d, yyyy"))
                                 </small>
                                 <div>
-                                    <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
-                                    <button class="delete-note-button" id="deleteNoteBtn">Delete Note</button>
+                                    <button class="note-action-btn edit" id="editNoteBtn">Edit</button>
+                                    <button class="note-action-btn delete" id="deleteNoteBtn">Delete</button>
                                 </div>
                             </div>
                         </div>
-    
-                        <textarea class="notes-textarea" id="noteText" rows="5" 
-                            style="display: none;"
-                            placeholder="Add your thoughts, modifications, or tips for this recipe...">@userNote.NoteText</textarea>
-                        <button class="save-note-button" id="saveNoteBtn" style="display: none;">Save Note</button>
+                        <!-- Edit state (hidden by default) -->
+                        <textarea class="notes-textarea" id="noteText" rows="5"
+                                  style="display:none;"
+                                  placeholder="Add your thoughts, modifications, or tips…">@userNote.NoteText</textarea>
+                        <button class="save-note-btn" id="saveNoteBtn" style="display:none;">Save Note</button>
                     }
                     else
                     {
-                        <textarea class="notes-textarea" id="noteText" rows="5" 
-                            placeholder="Add your thoughts, modifications, or tips for this recipe..."></textarea>
-                        <button class="save-note-button" id="saveNoteBtn">Save Note</button>
-            
-                        <div id="savedNote" class="saved-note-display" style="display: none;">
+                        <!-- New note state -->
+                        <textarea class="notes-textarea" id="noteText" rows="5"
+                                  placeholder="Add your thoughts, modifications, or tips for this recipe…"></textarea>
+                        <button class="save-note-btn" id="saveNoteBtn">Save Note</button>
+
+                        <div id="savedNote" class="saved-note-display" style="display:none;">
                             <p class="note-text" id="noteContent"></p>
                             <div class="note-footer">
                                 <small id="noteDate"></small>
-                                <button class="edit-note-button" id="editNoteBtn">Edit Note</button>
+                                <div>
+                                    <button class="note-action-btn edit" id="editNoteBtn">Edit</button>
+                                    <button class="note-action-btn delete" id="deleteNoteBtn">Delete</button>
+                                </div>
                             </div>
                         </div>
                     }
@@ -656,240 +861,207 @@
 {
     @section Scripts {
         <script>
+        (() => {
             const recipeId = @Model.Id;
-            const userId = @userId;
 
-            // ─── Star Rating ───────────────────────────────────────────────────────────
-            const stars = document.querySelectorAll('.star-rating span');
-            const ratingMessage = document.getElementById('ratingMessage');
-            const ratingTitle = document.getElementById('ratingTitle');
+            // ── Tabs ───────────────────────────────────────────────────────────
+            const tabBtns   = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-selected', 'false');
+                    });
+                    tabPanels.forEach(p => p.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                    document.getElementById(btn.getAttribute('aria-controls')).classList.add('active');
+                });
+            });
+
+            // ── Star Rating ────────────────────────────────────────────────────
+            const stars            = document.querySelectorAll('.star-row span');
+            const ratingMsg        = document.getElementById('ratingMessage');
+            const ratingTitle      = document.getElementById('ratingTitle');
             const badgeRatingValue = document.getElementById('badgeRatingValue');
             const badgeRatingCount = document.getElementById('badgeRatingCount');
 
-            // Track the user's committed rating (pre-seeded from server)
-            let committedRating = @userRating;
+            let committed = @userRating;
 
-            function applyStarDisplay(rating) {
-                stars.forEach((star, index) => {
-                    star.classList.toggle('filled', index < rating);
-                    star.classList.remove('hovered');
+            function paintStars(n) {
+                stars.forEach((s, i) => {
+                    s.classList.toggle('filled', i < n);
+                    s.classList.remove('hovered');
                 });
             }
 
-            // Initialise stars with any existing rating
-            applyStarDisplay(committedRating);
+            paintStars(committed);
 
-            // Hover: preview highlighted stars without changing committed state
+            // Hover preview
             stars.forEach(star => {
                 star.addEventListener('mouseenter', () => {
-                    const hoverRating = parseInt(star.dataset.rating);
+                    const hov = +star.dataset.rating;
                     stars.forEach((s, i) => {
-                        s.classList.toggle('hovered', i < hoverRating);
+                        s.classList.toggle('hovered', i < hov);
                         s.classList.remove('filled');
                     });
                 });
             });
 
-            document.querySelector('.star-rating').addEventListener('mouseleave', () => {
-                // Restore to committed rating on mouse-out
+            document.querySelector('.star-row').addEventListener('mouseleave', () => {
                 stars.forEach(s => s.classList.remove('hovered'));
-                applyStarDisplay(committedRating);
+                paintStars(committed);
             });
 
-           
             async function submitRating(rating) {
-                ratingMessage.textContent = 'Saving…';
-                ratingMessage.className = 'rating-message';
-
+                ratingMsg.textContent = 'Saving…';
+                ratingMsg.className = 'rating-msg';
                 try {
-                    const response = await fetch('/Recipe/RateRecipe', {
+                    const res  = await fetch('/Recipe/RateRecipe', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ recipeId, rating })
                     });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
 
-                    if (!response.ok) throw new Error('Server error');
-
-                    const data = await response.json();
-
-                    // Update committed state
-                    committedRating = rating;
-                    applyStarDisplay(committedRating);
-
-                    // Update the live badge in the hero
+                    committed = rating;
+                    paintStars(committed);
                     badgeRatingValue.textContent = data.newRating.toFixed(1);
                     badgeRatingCount.textContent = `(${data.newRatingCount})`;
-
-                    // Update UI labels
                     ratingTitle.textContent = 'Your Rating';
-                    ratingMessage.textContent = `✓ You rated this ${rating}/5`;
-                    ratingMessage.className = 'rating-message success';
-
-                    // Fade the success message after 3 seconds
+                    ratingMsg.textContent = `✓ Rated ${rating}/5`;
+                    ratingMsg.className = 'rating-msg success';
                     setTimeout(() => {
-                        ratingMessage.textContent = 'Click a star to update your rating';
-                        ratingMessage.className = 'rating-message';
+                        ratingMsg.textContent = 'Click a star to update';
+                        ratingMsg.className = 'rating-msg';
                     }, 3000);
+                } catch {
+                    ratingMsg.textContent = 'Failed to save — please try again.';
+                    ratingMsg.className = 'rating-msg error';
+                }
+            }
 
-                } catch (error) {
-                    console.error('Error submitting rating:', error);
-                    ratingMessage.textContent = 'Failed to save rating. Please try again.';
-                    ratingMessage.className = 'rating-message error';
+            async function removeRating() {
+                ratingMsg.textContent = 'Removing…';
+                ratingMsg.className = 'rating-msg';
+                try {
+                    const res  = await fetch('/Recipe/RemoveRating', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ recipeId })
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+
+                    committed = 0;
+                    paintStars(0);
+                    badgeRatingValue.textContent = data.newRating.toFixed(1);
+                    badgeRatingCount.textContent = `(${data.newRatingCount})`;
+                    ratingTitle.textContent = 'Rate This Recipe';
+                    ratingMsg.textContent = 'Rating removed';
+                    setTimeout(() => { ratingMsg.textContent = ''; }, 3000);
+                } catch {
+                    ratingMsg.textContent = 'Failed to remove — please try again.';
+                    ratingMsg.className = 'rating-msg error';
                 }
             }
 
             stars.forEach(star => {
-                star.addEventListener('click', async () => {
-                    const rating = parseInt(star.dataset.rating);
-
-                    if (rating === committedRating) {
-                        await removeRating();
-                    } else {
-                        await submitRating(rating);
-                    }
+                star.addEventListener('click', () => {
+                    const val = +star.dataset.rating;
+                    val === committed ? removeRating() : submitRating(val);
                 });
             });
 
-            async function removeRating() {
-                ratingMessage.textContent = 'Removing…';
-                ratingMessage.className = 'rating-message';
-
-                try {
-                    const response = await fetch('/Recipe/RemoveRating', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ recipeId })
-                    });
-
-                    if (!response.ok) throw new Error('Server error');
-
-                    const data = await response.json();
-
-                    committedRating = 0;
-                    applyStarDisplay(0);
-
-                    badgeRatingValue.textContent = data.newRating.toFixed(1);
-                    badgeRatingCount.textContent = `(${data.newRatingCount})`;
-
-                    ratingTitle.textContent = 'Rate This Recipe';
-                    ratingMessage.textContent = 'Your rating has been removed';
-                    ratingMessage.className = 'rating-message';
-
-                    setTimeout(() => { ratingMessage.textContent = ''; }, 3000);
-
-                } catch (error) {
-                    console.error('Error removing rating:', error);
-                    ratingMessage.textContent = 'Failed to remove rating. Please try again.';
-                    ratingMessage.className = 'rating-message error';
-                }
-}
-
-            // ─── Favorite Toggle ───────────────────────────────────────────────────────
-            const favoriteBtn = document.getElementById('favoriteBtn');
+            // ── Favorites ──────────────────────────────────────────────────────
+            const favoriteBtn  = document.getElementById('favoriteBtn');
             const favoriteText = document.getElementById('favoriteText');
-
-            let isFavorited = @(ViewBag.IsFavorited == true ? "true" : "false");
+            let isFavorited    = @(ViewBag.IsFavorited == true ? "true" : "false");
 
             favoriteBtn.addEventListener('click', async () => {
                 try {
-                    const response = await fetch('/Recipe/ToggleFavorite', {
+                    const res  = await fetch('/Recipe/ToggleFavorite', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ recipeId })
                     });
-
-                    if (!response.ok) throw new Error('Server error');
-
-                    const data = await response.json();
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
                     isFavorited = data.isFavorited;
-
-                    if (isFavorited) {
-                        favoriteBtn.classList.add('favorited');
-                        favoriteText.textContent = 'Saved to Favorites';
-                    } else {
-                        favoriteBtn.classList.remove('favorited');
-                        favoriteText.textContent = 'Add to Favorites';
-                    }
-                } catch (error) {
-                    console.error('Error toggling favorite:', error);
+                    favoriteBtn.classList.toggle('favorited', isFavorited);
+                    favoriteText.textContent = isFavorited ? 'Saved to Favorites' : 'Add to Favorites';
+                } catch {
                     alert('Failed to update favorites. Please try again.');
                 }
-});
+            });
 
-            // ─── Notes ─────────────────────────────────────────────────────────────────
-            const noteText = document.getElementById('noteText');
+            // ── Notes ──────────────────────────────────────────────────────────
+            const noteText    = document.getElementById('noteText');
             const saveNoteBtn = document.getElementById('saveNoteBtn');
-            const savedNote = document.getElementById('savedNote');
+            const savedNote   = document.getElementById('savedNote');
             const noteContent = document.getElementById('noteContent');
-            const noteDate = document.getElementById('noteDate');
+            const noteDate    = document.getElementById('noteDate');
             const editNoteBtn = document.getElementById('editNoteBtn');
             const deleteNoteBtn = document.getElementById('deleteNoteBtn');
-            
-            saveNoteBtn.addEventListener('click', async () => {
+
+            function showSavedState(text, dateStr) {
+                noteText.style.display    = 'none';
+                saveNoteBtn.style.display = 'none';
+                savedNote.style.display   = 'block';
+                noteContent.textContent   = text;
+                noteDate.textContent      = 'Saved ' + new Date(dateStr).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+            }
+
+            function showEditState() {
+                savedNote.style.display   = 'none';
+                noteText.style.display    = 'block';
+                saveNoteBtn.style.display = 'inline-block';
+                noteText.focus();
+            }
+
+            saveNoteBtn?.addEventListener('click', async () => {
                 const text = noteText.value.trim();
-                if (!text) {
-                    alert('Please write a note before saving.');
-                    return;
-                }
-                
+                if (!text) { noteText.focus(); return; }
                 try {
-                    const response = await fetch('/Recipe/SaveNote', {
+                    const res = await fetch('/Recipe/SaveNote', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ recipeId, noteText: text })
                     });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        showSavedNote(text, data.createdAt);
-                    }
-                } catch (error) {
-                    console.error('Error saving note:', error);
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    showSavedState(text, data.createdAt);
+                } catch {
+                    alert('Failed to save note. Please try again.');
                 }
             });
-            
-            function showSavedNote(text, date) {
-                noteText.style.display = 'none';
-                saveNoteBtn.style.display = 'none';
-                savedNote.style.display = 'block';
-                noteContent.textContent = text;
-                noteDate.textContent = 'Saved on ' + new Date(date).toLocaleDateString('en-US', {
-                    year: 'numeric', month: 'long', day: 'numeric'
-                });
-            }
-            
-            if (deleteNoteBtn) {
-                deleteNoteBtn.addEventListener('click', async () => {
-                    if (!confirm('Are you sure you want to delete this note?')) return;
 
-                    try {
-                        const response = await fetch('/Recipe/DeleteNote', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ recipeId })
-                        });
+            editNoteBtn?.addEventListener('click', showEditState);
 
-                        if (response.ok) {
-                            savedNote.style.display = 'none';
-                            noteText.style.display = 'block';
-                            noteText.value = '';
-                            saveNoteBtn.style.display = 'block';
-                        }
-                    } catch (error) {
-                        console.error('Error deleting note:', error);
-                        alert('Failed to delete note. Please try again.');
-                    }
-                });
-            }
-            
-            if (editNoteBtn) {
-                editNoteBtn.addEventListener('click', () => {
-                    noteText.style.display = 'block';
-                    saveNoteBtn.style.display = 'block';
-                    savedNote.style.display = 'none';
-                    noteText.focus();
-                });
-            }
+            deleteNoteBtn?.addEventListener('click', async () => {
+                if (!confirm('Delete this note?')) return;
+                try {
+                    const res = await fetch('/Recipe/DeleteNote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ recipeId })
+                    });
+                    if (!res.ok) throw new Error();
+                    savedNote.style.display   = 'none';
+                    noteText.value            = '';
+                    noteText.style.display    = 'block';
+                    saveNoteBtn.style.display = 'inline-block';
+                } catch {
+                    alert('Failed to delete note. Please try again.');
+                }
+            });
+        })();
         </script>
     }
 }

@@ -79,6 +79,7 @@ public class RecipeSeeder
         return Enum.Parse<T>(normalized, ignoreCase: true);
     }
     
+    
     public void SeedInstructions(AppDbContext context)
     {
         bool instructionsExist = context.RecipeInstructions.Any();
@@ -88,7 +89,7 @@ public class RecipeSeeder
             return;
         }
 
-        string filePath = "Data/instructions.csv";
+        string filePath = "Data/recipe_instructions.csv";
 
         StreamReader fileReader = new StreamReader(filePath);
         CsvReader csvReader = new CsvReader(fileReader, CultureInfo.InvariantCulture);
@@ -120,6 +121,8 @@ public class RecipeSeeder
         context.RecipeInstructions.AddRange(instructionsList);
         context.SaveChanges();
     }
+    
+    
 }
 
 // DTOs for deserialization
