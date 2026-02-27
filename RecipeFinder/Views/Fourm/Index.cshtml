@@ -1,0 +1,283 @@
+@{
+    ViewData["Title"] = "Fourm";
+}
+
+<style>
+    *, *::before, *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background-color: #f9f5ef;
+        color: #1a1a1a;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /* ─── BACKGROUND WATERMARK ─── */
+    body::before {
+        content: 'COMING SOON';
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(60px, 14vw, 180px);
+        font-weight: 300;
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(139, 127, 116, 0.09);
+        white-space: nowrap;
+        pointer-events: none;
+        letter-spacing: 0.08em;
+        user-select: none;
+        z-index: 0;
+    }
+
+    /* ─── CARD ─── */
+    .construction-card {
+        position: relative;
+        z-index: 1;
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(197, 189, 180, 0.5);
+        padding: 3.5rem 3rem;
+        max-width: 560px;
+        width: calc(100% - 2rem);
+        text-align: center;
+        animation: cardReveal 0.6s ease both;
+    }
+
+    @@keyframes cardReveal {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── ICON BADGE ─── */
+    .icon-badge {
+        width: 64px;
+        height: 64px;
+        background: #fef0e8;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.75rem;
+        animation: badgePulse 3s ease-in-out infinite;
+    }
+
+    @@keyframes badgePulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(232, 93, 38, 0.15); }
+        50%       { box-shadow: 0 0 0 10px rgba(232, 93, 38, 0); }
+    }
+
+    .icon-badge svg {
+        width: 28px;
+        height: 28px;
+        stroke: #e85d26;
+        fill: none;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* ─── EYEBROW ─── */
+    .card-eyebrow {
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #e85d26;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        margin-bottom: 0.85rem;
+    }
+
+    .card-eyebrow::before,
+    .card-eyebrow::after {
+        content: '';
+        display: block;
+        width: 28px;
+        height: 1px;
+        background: #e85d26;
+    }
+
+    /* ─── HEADING ─── */
+    .card-title {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 300;
+        line-height: 1.1;
+        color: #1a1a1a;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+    }
+
+    .card-title em {
+        font-style: italic;
+        color: #e85d26;
+    }
+
+    /* ─── DESCRIPTION ─── */
+    .card-desc {
+        font-size: 0.92rem;
+        color: #8a7f74;
+        line-height: 1.7;
+        max-width: 400px;
+        margin: 0 auto 2rem;
+    }
+
+    /* ─── DIVIDER ─── */
+    .card-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, #c5bdb4, transparent);
+        margin: 0 auto 2rem;
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-label span {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #8a7f74;
+    }
+
+    .progress-label strong {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #e85d26;
+    }
+
+    .progress-track {
+        height: 4px;
+        background: #f0e9dc;
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(to right, #e85d26, #f5814a);
+        border-radius: 99px;
+        animation: progressLoad 1.4s 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @@keyframes progressLoad {
+        to { width: 68%; }
+    }
+
+    /* ─── BACK BUTTON ─── */
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.75rem 1.5rem;
+        background: #1a1a1a;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-back svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: transform 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #e85d26;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(232, 93, 38, 0.25);
+    }
+
+    .btn-back:hover svg {
+        transform: translateX(-3px);
+    }
+
+    .btn-back:active {
+        transform: translateY(0);
+    }
+
+    /* ─── FOOTER NOTE ─── */
+    .card-footer {
+        margin-top: 1.5rem;
+        font-size: 0.78rem;
+        color: #c5bdb4;
+    }
+
+    @@media (max-width: 560px) {
+        .construction-card {
+            padding: 2.25rem 1.5rem;
+        }
+    }
+</style>
+
+<div class="construction-card">
+
+    <div class="icon-badge">
+        <!-- Hard hat / wrench icon -->
+        <svg viewBox="0 0 24 24">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+    </div>
+
+    <div class="card-eyebrow">Work in Progress</div>
+
+    <h1 class="card-title">Under <em>Construction</em></h1>
+
+    <p class="card-desc">
+        We're busy building something delicious for you. This page is being crafted with care — check back soon.
+    </p>
+
+    <div class="card-divider"></div>
+
+    <div class="progress-label">
+        <span>Build progress</span>
+        <strong>68%</strong>
+    </div>
+    <div class="progress-track">
+        <div class="progress-fill"></div>
+    </div>
+
+    <a href="javascript:history.back()" class="btn-back">
+        <svg viewBox="0 0 24 24">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Go Back
+    </a>
+
+    <p class="card-footer">Questions? Reach out to the team while we finish up.</p>
+
+</div>
