@@ -21,6 +21,13 @@
         overflow: hidden;
     }
 
+    main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 68px); /* 68px = navbar height */
+    }
+
     /* ─── BACKGROUND WATERMARK ─── */
     body::before {
         content: 'COMING SOON';
