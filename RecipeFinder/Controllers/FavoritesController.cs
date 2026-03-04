@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
 using RecipeFinder.Models;
+using RecipeFinder.Repository;
 
 namespace RecipeFinder.Controllers;
 
@@ -22,15 +23,11 @@ public class FavoritesController : Controller
     public async Task<IActionResult> Index()
     {
         var userId = int.Parse(_userManager.GetUserId(User)!);
-
-        var favorites = await _db.FavoriteRecipes
-            .Where(f => f.CustomerId == userId)
-            .Include(f => f.Recipe)
-            .OrderByDescending(f => f.AddedAt)
-            .Select(f => f.Recipe)
-            .ToListAsync();
-
-        return View(favorites);
+        DatabaseHelper helper = new DatabaseHelper(_db);
+        
+        var  favorites = await helper.GetUsersFavoriteRecipes(userId);
+        
+        return  View(favorites);
     }
 
     [HttpPost]

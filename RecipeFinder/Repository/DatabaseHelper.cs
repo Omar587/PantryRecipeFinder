@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
 using RecipeFinder.Models;
 
@@ -33,8 +34,21 @@ public class DatabaseHelper
 
         return  ingridients;
     }
-    
-        
-    
-    
+
+
+    public async Task<List<Recipe>> GetUsersFavoriteRecipes(int userId)
+    {
+        var favorites = await _context.FavoriteRecipes
+            .Where(f => f.CustomerId == userId)
+            .Include(f => f.Recipe)
+            .OrderByDescending(f => f.AddedAt)
+            .Select(f => f.Recipe)
+            .ToListAsync();
+
+        return favorites;
+
+    }
+
+
+
 }
