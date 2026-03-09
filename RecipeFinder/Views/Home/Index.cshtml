@@ -909,89 +909,138 @@
     </div>
 </div>
 
-
-<!-- MEMBERSHIP / WHY JOIN ══════════════════════════════════════════════════════════════ -->
-<div class="membership-band">
-    <div class="membership-inner">
-        <div>
-            <div class="eyebrow">Why Join</div>
-            <h2 class="membership-headline">Your personal<br><em>culinary</em><br>universe.</h2>
-            <p class="membership-body">
-                RecipeFinder is more than a recipe index — it's a living kitchen companion
-                that grows richer with every dish you cook, every note you write,
-                and every conversation you join.
-            </p>
-
-            <ul class="perks-list">
-                <li class="perk-item">
-                    <div class="perk-icon">♥</div>
-                    <span>Save unlimited favourites and build a personal recipe library that's yours forever</span>
-                </li>
-                <li class="perk-item">
-                    <div class="perk-icon">★</div>
-                    <span>Rate dishes and trust a community-driven score from real home cooks, not algorithms</span>
-                </li>
-                <li class="perk-item">
-                    <div class="perk-icon">✎</div>
-                    <span>Add private notes to any recipe — your modifications and secrets, safely stored</span>
-                </li>
-                <li class="perk-item">
-                    <div class="perk-icon">✦</div>
-                    <span>Start and join forum threads on any culinary topic, from technique to ingredient sourcing</span>
-                </li>
-            </ul>
-
-            <a href="/Account/Register" class="btn btn-dark">Create Free Account</a>
-        </div>
-
-        <div>
-            <div class="membership-forum">
-                @{
-                    var mforumRows = new[] {
-                        new { Init="CE", Name="Claire E.", Title="Brown butter changed everything — try it on pasta.", Tag="Tip",       Replies="34",  Time="1h" },
-                        new { Init="RK", Name="Raj K.",   Title="Does pasta water actually help carbonara?",            Tag="Technique", Replies="58",  Time="2h" },
-                        new { Init="LB", Name="Luna B.",  Title="Nailed the perfect croissant after 12 attempts!",      Tag="Win",       Replies="92",  Time="3h" },
-                        new { Init="TW", Name="Tom W.",   Title="The case against garlic presses — an essay.",          Tag="Opinion",   Replies="147", Time="5h" },
-                        new { Init="AM", Name="Anya M.",  Title="Go-to weeknight dinner when you have nothing?",        Tag="Q&A",       Replies="213", Time="8h" },
-                    };
-                    foreach (var r in mforumRows)
-                    {
-                        <a href="/Forum" class="mforum-row">
-                            <div class="mforum-avatar">@r.Init</div>
-                            <div class="mforum-content">
-                                <div class="mforum-title">@r.Title</div>
-                                <div class="mforum-meta">
-                                    <span class="mforum-tag">@r.Tag</span>
-                                    <span>@r.Name</span>
-                                    <span>· @r.Time ago</span>
-                                </div>
-                            </div>
-                            <div class="mforum-count">@r.Replies</div>
-                        </a>
-                    }
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-
+<!-- CTA CLOSE ══════════════════════════════════════════════════════════════════════════ -->
 <!-- CTA CLOSE ══════════════════════════════════════════════════════════════════════════ -->
 <div class="container">
-    <div class="cta-close">
-        <div>
-            <div class="cta-close-label">Free Forever</div>
-            <h2 class="cta-close-headline">
+    <div class="cta-close" style="grid-template-columns: auto 1fr auto; gap: 5rem; padding: 6rem; background: #f0e8da; -webkit-text-stroke: unset;">
+
+        <style>
+            .cta-close-light::before {
+                -webkit-text-stroke: 1px rgba(0,0,0,0.04) !important;
+            }
+            .cta-close-label-light {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.35em;
+                color: #e85d26;
+                font-weight: 700;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            .cta-close-label-light::after {
+                content: '';
+                height: 1px;
+                width: 40px;
+                background: #e85d26;
+            }
+            .cta-close-headline-light {
+                font-family: 'Cormorant Garamond', serif;
+                font-size: clamp(2.5rem, 3.5vw, 4rem);
+                font-weight: 300;
+                color: #1a1a1a;
+                line-height: 1.0;
+                letter-spacing: -0.03em;
+            }
+            .cta-close-headline-light em {
+                font-style: italic;
+                color: #e85d26;
+            }
+            .cta-sublink-light {
+                font-size: 0.75rem;
+                color: rgba(0,0,0,0.35);
+                text-decoration: none;
+                border-bottom: 1px solid rgba(0,0,0,0.12);
+                padding-bottom: 1px;
+                transition: color 0.2s, border-color 0.2s;
+                white-space: nowrap;
+            }
+            .cta-sublink-light:hover {
+                color: rgba(0,0,0,0.65);
+                border-color: rgba(0,0,0,0.4);
+            }
+        </style>
+
+        <div style="flex-shrink:0;">
+            <div class="cta-close-label-light">Free Forever</div>
+            <h2 class="cta-close-headline-light">
                 Ready to cook<br><em>something great?</em>
             </h2>
         </div>
+
+        <ul style="list-style:none; display:flex; flex-direction:column; justify-content:center; gap:1.1rem; position:relative; z-index:2; border-left: 1px solid rgba(0,0,0,0.08); padding-left: 3rem;">
+            <li style="display:flex; align-items:flex-start; gap:1rem; font-size:0.88rem; color:rgba(0,0,0,0.55); font-weight:300; line-height:1.5;">
+                <span style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(232,93,38,0.4); background: rgba(232,93,38,0.06); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#e85d26; flex-shrink:0; margin-top:1px;">♥</span>
+                Save unlimited favourites and build a personal recipe library that's yours forever
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:1rem; font-size:0.88rem; color:rgba(0,0,0,0.55); font-weight:300; line-height:1.5;">
+                <span style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(232,93,38,0.4); background: rgba(232,93,38,0.06); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#e85d26; flex-shrink:0; margin-top:1px;">★</span>
+                Rate dishes and trust a community-driven score from real home cooks, not algorithms
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:1rem; font-size:0.88rem; color:rgba(0,0,0,0.55); font-weight:300; line-height:1.5;">
+                <span style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(232,93,38,0.4); background: rgba(232,93,38,0.06); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#e85d26; flex-shrink:0; margin-top:1px;">✎</span>
+                Add private notes to any recipe — your modifications and secrets, safely stored
+            </li>
+            <li style="display:flex; align-items:flex-start; gap:1rem; font-size:0.88rem; color:rgba(0,0,0,0.55); font-weight:300; line-height:1.5;">
+                <span style="width:26px; height:26px; border-radius:50%; border:1px solid rgba(232,93,38,0.4); background: rgba(232,93,38,0.06); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:#e85d26; flex-shrink:0; margin-top:1px;">✦</span>
+                Start and join forum threads on any culinary topic, from technique to ingredient sourcing
+            </li>
+        </ul>
+
         <div class="cta-close-actions">
             <a href="/Account/Register" class="btn-accent">Start Cooking Free →</a>
-            <a href="/Recipe" class="cta-sublink">Browse without an account</a>
+            <a href="/Recipe" class="cta-sublink-light">Browse without an account</a>
         </div>
     </div>
 </div>
 
+
+<style>
+.cta-perk-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    font-size: 0.88rem;
+    color: rgba(255,255,255,0.55);
+    font-weight: 300;
+    line-height: 1.5;
+    padding: 0.75rem 1rem 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.25s ease, color 0.25s ease;
+    border-radius: 2px;
+    cursor: default;
+}
+
+.cta-perk-row:last-child { border-bottom: none; }
+
+.cta-perk-row:hover {
+    background: rgba(232,93,38,0.06);
+    color: rgba(255,255,255,0.8);
+    padding-left: 0.5rem;
+}
+
+.cta-perk-row:hover .cta-perk-icon {
+    box-shadow: 0 0 12px rgba(232,93,38,0.4);
+    border-color: rgba(232,93,38,0.7);
+    color: #e85d26;
+}
+
+.cta-perk-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(232,93,38,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #e85d26;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+</style>
 
 <script>
 // Scroll reveal — elements fade up as they enter the viewport
