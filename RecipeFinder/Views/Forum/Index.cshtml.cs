@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace RecipeFinder.Views.Fourm;
+namespace RecipeFinder.Views.Forum;
 
 public class Index : PageModel
 {

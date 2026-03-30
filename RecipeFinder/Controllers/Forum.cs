@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RecipeFinder.Controllers
 {
-    public class FourmController : Controller
+    public class ForumController : Controller
     {
         public IActionResult Index()
         {
