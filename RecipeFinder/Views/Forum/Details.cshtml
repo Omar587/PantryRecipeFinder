@@ -1,0 +1,684 @@
+@model RecipeFinder.ViewModels.Forum.ForumPostDetailViewModel
+@{
+    ViewData["Title"]  = Model.Title;
+    ViewData["PostId"] = Model.Id;
+}
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f9f5ef;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page-shell {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+}
+
+/* ─── BREADCRUMB ─── */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.5rem 0 1.25rem;
+    font-size: 0.8rem;
+    color: #8a7f74;
+}
+
+.breadcrumb a { color: #8a7f74; text-decoration: none; font-weight: 500; }
+.breadcrumb a:hover { color: #e85d26; }
+.breadcrumb-sep { color: #c5bdb4; }
+
+/* ─── POST CARD ─── */
+.post-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid rgba(197,189,180,0.4);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.post-inner {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+}
+
+/* Vote column */
+.vote-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.5rem 0;
+    background: #fafaf8;
+    border-right: 1px solid #f0e9dc;
+}
+
+.vote-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #c5bdb4;
+    transition: all 0.15s;
+}
+
+.vote-btn:hover { background: #f0e9dc; color: #1a1a1a; }
+.vote-btn.up.voted   { color: #e85d26; }
+.vote-btn.down.voted { color: #6b7280; }
+
+.vote-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
+
+.vote-score {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    min-width: 32px;
+    text-align: center;
+    line-height: 1;
+}
+
+.vote-score.positive { color: #e85d26; }
+.vote-score.negative { color: #6b7280; }
+
+/* Post content */
+.post-content {
+    padding: 1.75rem 2rem;
+    min-width: 0;
+}
+
+.post-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.post-flair {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.post-meta {
+    font-size: 0.78rem;
+    color: #8a7f74;
+}
+
+.post-meta a { color: #8a7f74; text-decoration: none; font-weight: 500; }
+.post-meta a:hover { color: #e85d26; }
+
+.post-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: #1a1a1a;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
+}
+
+.post-body-text {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: #333;
+    margin-bottom: 1.5rem;
+    white-space: pre-wrap;
+}
+
+.recipe-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #fef0e8;
+    color: #e85d26;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(232,93,38,0.15);
+    transition: background 0.2s;
+}
+
+.recipe-pill:hover { background: rgba(232,93,38,0.15); text-decoration: none; color: #e85d26; }
+
+.post-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f0e9dc;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.post-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.post-stat-item {
+    font-size: 0.78rem;
+    color: #8a7f74;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.post-stat-item svg {
+    width: 14px; height: 14px;
+    stroke: currentColor; fill: none;
+}
+
+.post-edit-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-edit-outline {
+    border: 1px solid #c5bdb4;
+    background: transparent;
+    color: #8a7f74;
+}
+
+.btn-edit-outline:hover { border-color: #8a7f74; color: #1a1a1a; text-decoration: none; }
+
+.btn-delete {
+    border: 1px solid rgba(192,57,43,0.25);
+    background: transparent;
+    color: #c0392b;
+}
+
+.btn-delete:hover { background: rgba(192,57,43,0.05); }
+
+/* ─── COMMENT SECTION ─── */
+.comments-section {
+    margin-top: 1.5rem;
+}
+
+.comments-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #c5bdb4;
+}
+
+.comments-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.comments-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    background: #f0e9dc;
+    color: #8a7f74;
+    border-radius: 100px;
+}
+
+/* Add comment form */
+.add-comment-card {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid rgba(197,189,180,0.4);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.add-comment-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8a7f74;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.85rem 1rem;
+    border: 1px solid #c5bdb4;
+    border-radius: 10px;
+    background: #f9f5ef;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    line-height: 1.6;
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: #e85d26;
+    box-shadow: 0 0 0 3px rgba(232,93,38,0.1);
+    background: white;
+}
+
+.comment-form-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+    justify-content: flex-end;
+}
+
+.btn-comment-submit {
+    padding: 0.6rem 1.25rem;
+    background: #e85d26;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-comment-submit:hover { background: #d44e1e; }
+
+.btn-comment-cancel {
+    padding: 0.6rem 1rem;
+    background: transparent;
+    color: #8a7f74;
+    border: 1px solid #c5bdb4;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-comment-cancel:hover { border-color: #8a7f74; color: #1a1a1a; }
+
+/* ─── COMMENT THREAD ─── */
+.comment-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.comment {
+    padding: 1.1rem 0;
+    border-bottom: 1px solid #f0e9dc;
+}
+
+.comment:last-child { border-bottom: none; }
+
+.comment-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.comment-author {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.comment-sep { color: #c5bdb4; font-size: 0.7rem; }
+
+.comment-time {
+    font-size: 0.75rem;
+    color: #8a7f74;
+}
+
+.comment-body {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #333;
+    margin-bottom: 0.65rem;
+    white-space: pre-wrap;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.comment-vote-btn {
+    width: 22px;
+    height: 22px;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #c5bdb4;
+    transition: all 0.15s;
+    padding: 0;
+}
+
+.comment-vote-btn:hover { background: #f0e9dc; color: #1a1a1a; }
+.comment-vote-btn.up.voted   { color: #e85d26; }
+.comment-vote-btn.down.voted { color: #6b7280; }
+
+.comment-score {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #8a7f74;
+    min-width: 18px;
+    text-align: center;
+}
+
+.comment-score.pos { color: #e85d26; }
+.comment-score.neg { color: #6b7280; }
+
+.comment-action-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8a7f74;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+}
+
+.comment-action-btn:hover { color: #1a1a1a; background: #f0e9dc; }
+.comment-action-btn.danger:hover { color: #c0392b; background: rgba(192,57,43,0.08); }
+
+/* Login nudge */
+.login-nudge {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid rgba(197,189,180,0.4);
+    padding: 1.5rem;
+    text-align: center;
+    color: #8a7f74;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.login-nudge a { color: #e85d26; font-weight: 600; text-decoration: none; }
+.login-nudge a:hover { text-decoration: underline; }
+
+/* Empty comments */
+.no-comments {
+    padding: 2.5rem;
+    text-align: center;
+    color: #c5bdb4;
+    font-size: 0.9rem;
+}
+
+.no-comments .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+
+@@media (max-width: 600px) {
+    .page-shell { padding: 0 1rem 3rem; }
+    .post-inner { grid-template-columns: 48px 1fr; }
+    .post-content { padding: 1.25rem; }
+}
+</style>
+
+<div class="page-shell">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a asp-action="Index">Forum</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>@Model.Title</span>
+    </nav>
+
+    <!-- ── POST ── -->
+    <div class="post-card">
+        <div class="post-inner">
+            <!-- Vote col -->
+            <div class="vote-col">
+                <button class="vote-btn up @(Model.UserVote == 1 ? "voted" : "")"
+                        onclick="votePost(@Model.Id, 1)" title="Upvote">
+                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"/>
+                    </svg>
+                </button>
+                <span class="vote-score @(Model.VoteScore > 0 ? "positive" : Model.VoteScore < 0 ? "negative" : "")"
+                      id="post-score">@Model.VoteScore</span>
+                <button class="vote-btn down @(Model.UserVote == -1 ? "voted" : "")"
+                        onclick="votePost(@Model.Id, -1)" title="Downvote">
+                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="post-content">
+                <div class="post-top">
+                    @if (!string.IsNullOrEmpty(Model.FlairName))
+                    {
+                        <span class="post-flair"
+                              style="background:@(Model.FlairColorHex + "22");color:@Model.FlairColorHex">
+                            @Model.FlairName
+                        </span>
+                    }
+                    <span class="post-meta">
+                        Posted by
+                        <a asp-controller="Customer" asp-action="Profile" asp-route-id="@Model.AuthorId">@Model.AuthorName</a>
+                        · @TimeAgo(Model.CreatedAt)
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <span style="color:#c5bdb4"> · edited @TimeAgo(Model.UpdatedAt.Value)</span>
+                        }
+                    </span>
+                </div>
+
+                <h1 class="post-title">@Model.Title</h1>
+
+                @if (Model.RecipeId.HasValue)
+                {
+                    <a class="recipe-pill" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.RecipeId">
+                        🍴 <span>@Model.RecipeName</span>
+                    </a>
+                }
+
+                <div class="post-body-text">@Model.Body</div>
+
+                <div class="post-footer">
+                    <div class="post-stats">
+                        <div class="post-stat-item">
+                            <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            @Model.Comments.Count comments
+                        </div>
+                    </div>
+
+                    @if (Model.CanEdit)
+                    {
+                        <div class="post-edit-actions">
+                            <a class="btn-edit btn-edit-outline"
+                               asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+                            <form asp-action="Delete" method="post" style="display:inline"
+                                  onsubmit="return confirm('Delete this post?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn-edit btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── COMMENTS ── -->
+    <section class="comments-section" id="comments">
+        <div class="comments-header">
+            <h2 class="comments-title">Comments</h2>
+            <span class="comments-count">@Model.Comments.Count</span>
+        </div>
+
+        <!-- Add comment -->
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="add-comment-card">
+                <span class="add-comment-label">Leave a comment</span>
+                <form asp-controller="ForumComment" asp-action="Add" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="NewComment.ForumPostId" />
+                    <textarea asp-for="NewComment.Body"
+                              class="comment-textarea"
+                              placeholder="Share your thoughts…"
+                              maxlength="5000"></textarea>
+                    <span asp-validation-for="NewComment.Body" class="text-danger" style="font-size:0.78rem"></span>
+                    <div class="comment-form-actions">
+                        <button type="submit" class="btn-comment-submit">Post Comment</button>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="login-nudge">
+                <a asp-controller="Account" asp-action="Login">Sign in</a> to join the discussion.
+            </div>
+        }
+
+        <!-- Thread -->
+        <div class="comment-thread">
+            @if (!Model.Comments.Any())
+            {
+                <div class="no-comments">
+                    <div class="icon">💬</div>
+                    No comments yet. Be the first!
+                </div>
+            }
+            else
+            {
+                foreach (var comment in Model.Comments)
+                {
+                    @await Html.PartialAsync("_CommentPartial", comment, ViewData)
+                }
+            }
+        </div>
+    </section>
+</div>
+
+<script>
+// ─── Post voting ────────────────────────────────────────────────────────────
+async function votePost(postId, value) {
+    try {
+        const res  = await fetch('/Forum/Vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `postId=${postId}&value=${value}&__RequestVerificationToken=${getToken()}`
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const scoreEl = document.getElementById('post-score');
+        if (scoreEl) {
+            scoreEl.textContent = data.newScore;
+            scoreEl.className   = 'vote-score' + (data.newScore > 0 ? ' positive' : data.newScore < 0 ? ' negative' : '');
+        }
+        document.querySelectorAll('.vote-col .vote-btn').forEach(b => b.classList.remove('voted'));
+        if (data.userVote === 1)  document.querySelector('.vote-btn.up')?.classList.add('voted');
+        if (data.userVote === -1) document.querySelector('.vote-btn.down')?.classList.add('voted');
+    } catch(e) { console.error(e); }
+}
+
+// ─── Comment voting ──────────────────────────────────────────────────────────
+async function voteComment(commentId, value) {
+    try {
+        const res  = await fetch('/ForumComment/Vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `commentId=${commentId}&value=${value}&__RequestVerificationToken=${getToken()}`
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        const scoreEl = document.getElementById(`comment-score-${commentId}`);
+        const comment = document.getElementById(`comment-${commentId}`);
+        if (scoreEl) {
+            scoreEl.textContent = data.newScore;
+            scoreEl.className   = 'comment-score' + (data.newScore > 0 ? ' pos' : data.newScore < 0 ? ' neg' : '');
+        }
+        if (comment) {
+            comment.querySelectorAll('.comment-vote-btn').forEach(b => b.classList.remove('voted'));
+            if (data.userVote === 1)  comment.querySelector('.comment-vote-btn.up')?.classList.add('voted');
+            if (data.userVote === -1) comment.querySelector('.comment-vote-btn.down')?.classList.add('voted');
+        }
+    } catch(e) { console.error(e); }
+}
+
+// ─── Edit / reply toggles ────────────────────────────────────────────────────
+function toggleEdit(commentId, show) {
+    document.getElementById(`edit-form-${commentId}`).style.display = show ? 'block' : 'none';
+    document.getElementById(`body-${commentId}`).style.display      = show ? 'none'  : 'block';
+    document.getElementById(`actions-${commentId}`).style.display   = show ? 'none'  : 'flex';
+}
+
+function toggleReply(commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    const isHidden = form.style.display === 'none';
+    form.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) form.querySelector('textarea')?.focus();
+}
+
+function getToken() {
+    return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+}
+</script>
+
+<form style="display:none">@Html.AntiForgeryToken()</form>
+
+@functions {
+    static string TimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span.TotalMinutes < 1)  return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM d, yyyy");
+    }
+}

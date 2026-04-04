@@ -4,6 +4,7 @@ using RecipeFinder.Data;
 using RecipeFinder.Models;
 using RecipeFinder.Services;
 using RecipeFinder.Repository;
+using RecipeFinder.Services.Forum;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+
+builder.Services.AddScoped<IForumPostService,    ForumPostService>();
+builder.Services.AddScoped<IForumCommentService, ForumCommentService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

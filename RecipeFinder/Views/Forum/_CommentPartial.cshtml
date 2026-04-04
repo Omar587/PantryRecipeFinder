@@ -1,0 +1,129 @@
+@model RecipeFinder.ViewModels.Forum.ForumCommentViewModel
+@* Recursive partial — called by Details.cshtml for each top-level comment,
+   then calls itself for each reply. Depth-limited via ViewData. *@
+@{
+    int depth = ViewData["depth"] as int? ?? 0;
+}
+
+<div class="comment @(depth > 0 ? "is-reply" : "")" 
+     id="comment-@Model.Id"
+     style="@(depth > 0 ? $"margin-left:{Math.Min(depth,4) * 1.5}rem; border-left:2px solid #f0e9dc; padding-left:1rem;" : "")">
+
+    <div class="comment-meta">
+        @if (Model.IsDeleted)
+        {
+            <span style="color:#c5bdb4;font-style:italic;font-size:0.8rem">[comment deleted]</span>
+        }
+        else
+        {
+            <span class="comment-author">@Model.AuthorName</span>
+            <span class="comment-sep">·</span>
+            <span class="comment-time">@TimeAgo(Model.CreatedAt)</span>
+            @if (Model.CreatedAt != Model.CreatedAt) // placeholder — use UpdatedAt if available
+            {
+                <span class="comment-sep">·</span>
+                <span style="font-size:0.7rem;color:#c5bdb4">edited</span>
+            }
+        }
+    </div>
+
+    <div class="comment-body" id="body-@Model.Id">
+        @if (Model.IsDeleted)
+        {
+            <span style="color:#c5bdb4;font-style:italic">[deleted]</span>
+        }
+        else
+        {
+            <p>@Model.Body</p>
+        }
+    </div>
+
+    @if (!Model.IsDeleted)
+    {
+        <!-- Edit form (hidden by default) -->
+        <form id="edit-form-@Model.Id" class="edit-form" style="display:none"
+              asp-controller="ForumComment" asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="commentId" value="@Model.Id" />
+            <input type="hidden" name="postId" value="@ViewData["PostId"]" />
+            <textarea name="body" class="comment-textarea">@Model.Body</textarea>
+            <div class="comment-form-actions">
+                <button type="submit" class="btn-comment-submit">Save</button>
+                <button type="button" class="btn-comment-cancel"
+                        onclick="toggleEdit(@Model.Id, false)">Cancel</button>
+            </div>
+        </form>
+
+        <div class="comment-actions" id="actions-@Model.Id">
+            <!-- Vote -->
+            <button class="comment-vote-btn up @(Model.UserVote == 1 ? "voted" : "")"
+                    onclick="voteComment(@Model.Id, 1)" title="Upvote">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <span class="comment-score @(Model.VoteScore > 0 ? "pos" : Model.VoteScore < 0 ? "neg" : "")"
+                  id="comment-score-@Model.Id">@Model.VoteScore</span>
+            <button class="comment-vote-btn down @(Model.UserVote == -1 ? "voted" : "")"
+                    onclick="voteComment(@Model.Id, -1)" title="Downvote">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <span class="comment-sep">·</span>
+
+            <!-- Reply toggle -->
+            <button class="comment-action-btn" onclick="toggleReply(@Model.Id)">Reply</button>
+
+            @if (Model.CanEdit)
+            {
+                <span class="comment-sep">·</span>
+                <button class="comment-action-btn" onclick="toggleEdit(@Model.Id, true)">Edit</button>
+                <span class="comment-sep">·</span>
+                <form asp-controller="ForumComment" asp-action="Delete" method="post" style="display:inline"
+                      onsubmit="return confirm('Delete this comment?')">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="commentId" value="@Model.Id" />
+                    <input type="hidden" name="postId" value="@ViewData["PostId"]" />
+                    <button type="submit" class="comment-action-btn danger">Delete</button>
+                </form>
+            }
+        </div>
+
+        <!-- Reply form -->
+        <div id="reply-form-@Model.Id" style="display:none; margin-top:0.75rem;">
+            <form asp-controller="ForumComment" asp-action="Add" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ForumPostId" value="@ViewData["PostId"]" />
+                <input type="hidden" name="ParentCommentId" value="@Model.Id" />
+                <textarea name="Body" class="comment-textarea" placeholder="Write a reply…" required maxlength="5000"></textarea>
+                <div class="comment-form-actions">
+                    <button type="submit" class="btn-comment-submit">Post Reply</button>
+                    <button type="button" class="btn-comment-cancel"
+                            onclick="toggleReply(@Model.Id)">Cancel</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    <!-- Nested replies -->
+    @if (Model.Replies.Any())
+    {
+        <div class="replies" style="margin-top:1rem;">
+            @foreach (var reply in Model.Replies)
+            {
+                ViewData["depth"] = depth + 1;
+                @await Html.PartialAsync("_CommentPartial", reply, ViewData)
+            }
+        </div>
+    }
+</div>
+
+@functions {
+    static string TimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span.TotalMinutes < 1)  return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM d, yyyy");
+    }
+}

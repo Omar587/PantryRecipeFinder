@@ -1,0 +1,426 @@
+@model RecipeFinder.ViewModels.Forum.CreatePostViewModel
+@{
+    ViewData["Title"] = "New Post";
+}
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f9f5ef;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+}
+
+.page-shell {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1.5rem 0 1.25rem;
+    font-size: 0.8rem;
+    color: #8a7f74;
+}
+
+.breadcrumb a { color: #8a7f74; text-decoration: none; font-weight: 500; }
+.breadcrumb a:hover { color: #e85d26; }
+.breadcrumb-sep { color: #c5bdb4; }
+
+/* ─── PAGE HEADER ─── */
+.page-hero {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #c5bdb4;
+}
+
+.hero-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #e85d26;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: #e85d26;
+}
+
+.hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    font-weight: 300;
+    color: #1a1a1a;
+    line-height: 1;
+}
+
+.hero-title em { font-style: italic; color: #e85d26; }
+
+/* ─── FORM CARD ─── */
+.form-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid rgba(197,189,180,0.4);
+    padding: 2rem 2.25rem;
+}
+
+.form-section {
+    margin-bottom: 1.75rem;
+}
+
+.field-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8a7f74;
+    margin-bottom: 0.6rem;
+}
+
+.field-label .required {
+    color: #e85d26;
+    margin-left: 0.2rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #c5bdb4;
+    border-radius: 10px;
+    background: #f9f5ef;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #e85d26;
+    box-shadow: 0 0 0 3px rgba(232,93,38,0.1);
+    background: white;
+}
+
+.form-input.input-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.form-textarea {
+    width: 100%;
+    min-height: 220px;
+    padding: 0.9rem 1rem;
+    border: 1px solid #c5bdb4;
+    border-radius: 10px;
+    background: #f9f5ef;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: #1a1a1a;
+    line-height: 1.7;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-textarea:focus {
+    outline: none;
+    border-color: #e85d26;
+    box-shadow: 0 0 0 3px rgba(232,93,38,0.1);
+    background: white;
+}
+
+.field-hint {
+    font-size: 0.73rem;
+    color: #c5bdb4;
+    margin-top: 0.4rem;
+}
+
+.char-counter {
+    font-size: 0.72rem;
+    color: #c5bdb4;
+    text-align: right;
+    margin-top: 0.35rem;
+    transition: color 0.2s;
+}
+
+.char-counter.warn { color: #c17b1a; }
+.char-counter.over { color: #c0392b; font-weight: 600; }
+
+/* Two-col grid for optional fields */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem 2.25rem 0.75rem 0.9rem;
+    border: 1px solid #c5bdb4;
+    border-radius: 10px;
+    background: #f9f5ef;
+    color: #1a1a1a;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a7f74' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: #e85d26;
+    box-shadow: 0 0 0 3px rgba(232,93,38,0.1);
+    background-color: white;
+}
+
+/* Divider */
+.form-divider {
+    height: 1px;
+    background: #f0e9dc;
+    margin: 2rem 0;
+}
+
+/* Flair preview */
+.flair-preview {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+/* Validation */
+.field-validation-error {
+    display: block;
+    font-size: 0.75rem;
+    color: #c0392b;
+    margin-top: 0.4rem;
+}
+
+.input-validation-error {
+    border-color: #c0392b !important;
+}
+
+/* Submit row */
+.form-submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0e9dc;
+}
+
+.btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.75rem;
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.btn-submit:hover { background: #e85d26; transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.8rem 1.25rem;
+    background: transparent;
+    color: #8a7f74;
+    border: 1px solid #c5bdb4;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    border-color: #8a7f74;
+    color: #1a1a1a;
+    text-decoration: none;
+}
+
+@@media (max-width: 600px) {
+    .page-shell { padding: 0 1rem 3rem; }
+    .form-card { padding: 1.25rem; }
+    .form-row { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="page-shell">
+
+    <nav class="breadcrumb">
+        <a asp-action="Index">Forum</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>New Post</span>
+    </nav>
+
+    <div class="page-hero">
+        <div class="hero-eyebrow">Community</div>
+        <h1 class="hero-title">Start a <em>Discussion</em></h1>
+    </div>
+
+    <div class="form-card">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- Title -->
+            <div class="form-section">
+                <label class="field-label" asp-for="Title">
+                    Title <span class="required">*</span>
+                </label>
+                <input asp-for="Title"
+                       class="form-input input-title"
+                       placeholder="Give your post a clear, descriptive title…"
+                       maxlength="300"
+                       id="titleInput"
+                       autocomplete="off" />
+                <div class="char-counter" id="titleCounter">0 / 300</div>
+                <span asp-validation-for="Title" class="field-validation-error"></span>
+            </div>
+
+            <!-- Body -->
+            <div class="form-section">
+                <label class="field-label" asp-for="Body">
+                    Body <span class="required">*</span>
+                </label>
+                <textarea asp-for="Body"
+                          class="form-textarea"
+                          placeholder="Share your recipe tips, questions, or thoughts…"
+                          maxlength="40000"
+                          id="bodyInput"></textarea>
+                <div class="char-counter" id="bodyCounter">0 / 40,000</div>
+                <span asp-validation-for="Body" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-divider"></div>
+
+            <!-- Optional fields -->
+            <div class="form-row">
+
+                @if (Model.AvailableFlairs.Any())
+                {
+                    <div class="form-section" style="margin-bottom:0">
+                        <label class="field-label" asp-for="FlairId">Tag / Flair</label>
+                        <select asp-for="FlairId" class="form-select" id="flairSelect">
+                            <option value="">No tag</option>
+                            @foreach (var flair in Model.AvailableFlairs)
+                            {
+                                <option value="@flair.Id" data-color="@flair.ColorHex">@flair.Name</option>
+                            }
+                        </select>
+                        <div class="flair-preview" id="flairPreview"></div>
+                    </div>
+                }
+
+                @if (Model.AvailableRecipes.Any())
+                {
+                    <div class="form-section" style="margin-bottom:0">
+                        <label class="field-label" asp-for="RecipeId">Link a Recipe <em style="font-style:normal;color:#c5bdb4;font-weight:400">(optional)</em></label>
+                        <select asp-for="RecipeId" class="form-select">
+                            <option value="">None</option>
+                            @foreach (var recipe in Model.AvailableRecipes)
+                            {
+                                <option value="@recipe.Id">@recipe.Name</option>
+                            }
+                        </select>
+                        <div class="field-hint">Attach a recipe from the collection to your post.</div>
+                    </div>
+                }
+
+            </div>
+
+            <div class="form-submit-row">
+                <a asp-action="Index" class="btn-cancel">Cancel</a>
+                <button type="submit" class="btn-submit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                    Publish Post
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Char counters
+function attachCounter(inputId, counterId, max, warn) {
+    const el  = document.getElementById(inputId);
+    const ctr = document.getElementById(counterId);
+    if (!el || !ctr) return;
+    const update = () => {
+        const len = el.value.length;
+        ctr.textContent = `${len.toLocaleString()} / ${max.toLocaleString()}`;
+        ctr.className   = 'char-counter' + (len >= max ? ' over' : len >= warn ? ' warn' : '');
+    };
+    el.addEventListener('input', update);
+    update();
+}
+
+attachCounter('titleInput', 'titleCounter', 300, 250);
+attachCounter('bodyInput',  'bodyCounter', 40000, 35000);
+
+// Flair live preview
+const flairSelect  = document.getElementById('flairSelect');
+const flairPreview = document.getElementById('flairPreview');
+
+if (flairSelect && flairPreview) {
+    flairSelect.addEventListener('change', () => {
+        const opt   = flairSelect.options[flairSelect.selectedIndex];
+        const color = opt.dataset.color;
+        if (!color || !opt.value) {
+            flairPreview.style.display = 'none';
+            return;
+        }
+        flairPreview.style.display    = 'inline-flex';
+        flairPreview.style.background = color + '22';
+        flairPreview.style.color      = color;
+        flairPreview.textContent      = opt.text;
+    });
+}
+</script>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
