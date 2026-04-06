@@ -261,6 +261,7 @@ public class ForumPostService : IForumPostService
             UserVote        = currentCustomerId.HasValue
                                 ? c.Votes.FirstOrDefault(v => v.CustomerId == currentCustomerId)?.Value
                                 : null,
+            UpdatedAt = c.UpdatedAt,
             ParentCommentId = c.ParentCommentId,
             IsDeleted       = c.IsDeleted,
             CanEdit         = !c.IsDeleted && currentCustomerId == c.CustomerId,

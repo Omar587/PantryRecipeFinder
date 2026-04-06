@@ -2,6 +2,25 @@
 @{
     ViewData["Title"]  = Model.Title;
     ViewData["PostId"] = Model.Id;
+
+    string Initials(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name[0].ToString().ToUpper();
+
+    string AvatarColor(string name)
+    {
+        var colors = new[] { "#e85d26","#2d7d46","#c17b1a","#2563eb","#7c3aed","#db2777","#0891b2" };
+        return colors[Math.Abs((name ?? "?").GetHashCode()) % colors.Length];
+    }
+
+    string TimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span.TotalMinutes < 1)  return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM d, yyyy");
+    }
 }
 
 <style>
@@ -9,137 +28,104 @@
 
 body {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f9f5ef;
+    background: #f0ece4;
     color: #1a1a1a;
     -webkit-font-smoothing: antialiased;
 }
 
-.page-shell {
-    max-width: 860px;
+.container { max-width: 100% !important; padding: 0 !important; }
+
+.forum-shell {
+    max-width: 780px;
     margin: 0 auto;
-    padding: 0 2rem 4rem;
+    padding: 1.5rem 1rem 4rem;
 }
 
-/* ─── BREADCRUMB ─── */
 .breadcrumb {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 1.5rem 0 1.25rem;
-    font-size: 0.8rem;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.78rem;
     color: #8a7f74;
+    background: none;
+    padding: 0;
 }
-
 .breadcrumb a { color: #8a7f74; text-decoration: none; font-weight: 500; }
 .breadcrumb a:hover { color: #e85d26; }
 .breadcrumb-sep { color: #c5bdb4; }
 
 /* ─── POST CARD ─── */
 .post-card {
-    background: white;
+    background: #fff;
     border-radius: 16px;
-    border: 1px solid rgba(197,189,180,0.4);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    margin-bottom: 1rem;
     overflow: hidden;
-    margin-bottom: 1.5rem;
 }
 
-.post-inner {
-    display: grid;
-    grid-template-columns: 60px 1fr;
-}
-
-/* Vote column */
-.vote-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    padding: 1.5rem 0;
-    background: #fafaf8;
-    border-right: 1px solid #f0e9dc;
-}
-
-.vote-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #c5bdb4;
-    transition: all 0.15s;
-}
-
-.vote-btn:hover { background: #f0e9dc; color: #1a1a1a; }
-.vote-btn.up.voted   { color: #e85d26; }
-.vote-btn.down.voted { color: #6b7280; }
-
-.vote-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
-
-.vote-score {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    min-width: 32px;
-    text-align: center;
-    line-height: 1;
-}
-
-.vote-score.positive { color: #e85d26; }
-.vote-score.negative { color: #6b7280; }
-
-/* Post content */
-.post-content {
-    padding: 1.75rem 2rem;
-    min-width: 0;
-}
-
-.post-top {
+.post-header {
+    padding: 1.25rem 1.5rem 0;
     display: flex;
     align-items: center;
     gap: 0.75rem;
+}
+
+.avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.avatar-sm { width: 34px; height: 34px; font-size: 0.78rem; }
+
+.post-author-name { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; }
+
+.post-author-meta {
+    font-size: 0.72rem;
+    color: #8a7f74;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.1rem;
     flex-wrap: wrap;
-    margin-bottom: 1rem;
 }
 
 .post-flair {
     display: inline-flex;
     align-items: center;
-    padding: 0.25rem 0.75rem;
+    padding: 0.15rem 0.55rem;
     border-radius: 100px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
 }
 
-.post-meta {
-    font-size: 0.78rem;
-    color: #8a7f74;
-}
-
-.post-meta a { color: #8a7f74; text-decoration: none; font-weight: 500; }
-.post-meta a:hover { color: #e85d26; }
+.post-content { padding: 1rem 1.5rem 0; }
 
 .post-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1.5rem, 4vw, 2.2rem);
-    font-weight: 600;
-    line-height: 1.15;
+    font-size: clamp(1.4rem, 3.5vw, 2rem);
+    font-weight: 700;
+    line-height: 1.2;
     color: #1a1a1a;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.85rem;
     letter-spacing: -0.02em;
 }
 
 .post-body-text {
     font-size: 0.95rem;
     line-height: 1.75;
-    color: #333;
-    margin-bottom: 1.5rem;
+    color: #374151;
     white-space: pre-wrap;
+    margin-bottom: 1rem;
 }
 
 .recipe-pill {
@@ -153,345 +139,336 @@ body {
     font-size: 0.82rem;
     font-weight: 600;
     text-decoration: none;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(232,93,38,0.15);
+    margin-bottom: 1rem;
+    border: 1px solid rgba(232,93,38,0.2);
     transition: background 0.2s;
 }
-
 .recipe-pill:hover { background: rgba(232,93,38,0.15); text-decoration: none; color: #e85d26; }
 
-.post-footer {
+/* ─── REACTIONS BAR ─── */
+.post-reactions {
+    padding: 0.6rem 1.5rem;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-top: 1.25rem;
-    border-top: 1px solid #f0e9dc;
-    gap: 1rem;
+    gap: 0.2rem;
+    border-top: 1px solid #f3f0eb;
+    margin-top: 0.75rem;
     flex-wrap: wrap;
 }
 
-.post-stats {
-    display: flex;
-    gap: 1.5rem;
-}
-
-.post-stat-item {
-    font-size: 0.78rem;
-    color: #8a7f74;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-}
-
-.post-stat-item svg {
-    width: 14px; height: 14px;
-    stroke: currentColor; fill: none;
-}
-
-.post-edit-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-edit {
+.reaction-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.45rem 0.9rem;
+    padding: 0.45rem 0.8rem;
+    border: none;
+    background: none;
     border-radius: 8px;
-    font-size: 0.78rem;
-    font-weight: 500;
     font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #8a7f74;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.reaction-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.reaction-btn.active-up { color: #e85d26; background: #fef0e8; }
+.reaction-btn.active-down { color: #6b7280; background: #f3f4f6; }
+.reaction-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.vote-score-display {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    padding: 0 0.2rem;
+    min-width: 22px;
+    text-align: center;
+}
+.vote-score-display.pos { color: #e85d26; }
+.vote-score-display.neg { color: #6b7280; }
+
+.reaction-sep { width: 1px; height: 18px; background: #e5e1db; margin: 0 0.2rem; flex-shrink: 0; }
+
+.post-edit-btns { margin-left: auto; display: flex; gap: 0.4rem; }
+
+.btn-sm {
+    padding: 0.38rem 0.8rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
     cursor: pointer;
     text-decoration: none;
-    transition: all 0.2s;
-}
-
-.btn-edit-outline {
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     border: 1px solid #c5bdb4;
     background: transparent;
     color: #8a7f74;
 }
+.btn-sm:hover { border-color: #8a7f74; color: #1a1a1a; text-decoration: none; }
+.btn-sm.danger { border-color: rgba(192,57,43,0.25); color: #c0392b; }
+.btn-sm.danger:hover { background: rgba(192,57,43,0.06); }
 
-.btn-edit-outline:hover { border-color: #8a7f74; color: #1a1a1a; text-decoration: none; }
-
-.btn-delete {
-    border: 1px solid rgba(192,57,43,0.25);
-    background: transparent;
-    color: #c0392b;
-}
-
-.btn-delete:hover { background: rgba(192,57,43,0.05); }
-
-/* ─── COMMENT SECTION ─── */
+/* ─── COMMENTS SECTION ─── */
 .comments-section {
-    margin-top: 1.5rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    overflow: hidden;
 }
 
 .comments-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f0eb;
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #c5bdb4;
 }
 
-.comments-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #1a1a1a;
-}
+.comments-title { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; }
 
-.comments-count {
-    font-size: 0.78rem;
-    font-weight: 600;
-    padding: 0.2rem 0.6rem;
-    background: #f0e9dc;
+.comments-count-badge {
+    padding: 0.18rem 0.55rem;
+    background: #f3f0eb;
     color: #8a7f74;
     border-radius: 100px;
-}
-
-/* Add comment form */
-.add-comment-card {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid rgba(197,189,180,0.4);
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.add-comment-label {
     font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: #8a7f74;
-    margin-bottom: 0.75rem;
-    display: block;
+    font-weight: 700;
 }
+
+/* ─── ADD COMMENT ─── */
+.add-comment-wrap {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f3f0eb;
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+}
+
+.comment-input-col { flex: 1; min-width: 0; }
 
 .comment-textarea {
     width: 100%;
-    min-height: 100px;
-    padding: 0.85rem 1rem;
-    border: 1px solid #c5bdb4;
-    border-radius: 10px;
-    background: #f9f5ef;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e5e1db;
+    border-radius: 12px;
+    background: #fafaf8;
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     color: #1a1a1a;
-    resize: vertical;
-    transition: border-color 0.2s, box-shadow 0.2s;
     line-height: 1.6;
+    resize: none;
+    min-height: 80px;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
-
 .comment-textarea:focus {
     outline: none;
     border-color: #e85d26;
     box-shadow: 0 0 0 3px rgba(232,93,38,0.1);
     background: white;
+    min-height: 110px;
 }
+.comment-textarea::placeholder { color: #c5bdb4; }
 
 .comment-form-actions {
     display: flex;
-    gap: 0.6rem;
-    margin-top: 0.75rem;
     justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
 }
 
-.btn-comment-submit {
-    padding: 0.6rem 1.25rem;
+.btn-post {
+    padding: 0.52rem 1.2rem;
     background: #e85d26;
     color: white;
     border: none;
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.15s;
 }
+.btn-post:hover { background: #d44e1e; transform: translateY(-1px); }
 
-.btn-comment-submit:hover { background: #d44e1e; }
-
-.btn-comment-cancel {
-    padding: 0.6rem 1rem;
+.btn-cancel-inline {
+    padding: 0.52rem 0.9rem;
     background: transparent;
     color: #8a7f74;
-    border: 1px solid #c5bdb4;
+    border: 1.5px solid #e5e1db;
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
 }
+.btn-cancel-inline:hover { border-color: #8a7f74; color: #1a1a1a; }
 
-.btn-comment-cancel:hover { border-color: #8a7f74; color: #1a1a1a; }
+.login-nudge {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid #f3f0eb;
+    font-size: 0.88rem;
+    color: #8a7f74;
+    background: #fafaf8;
+}
+.login-nudge a { color: #e85d26; font-weight: 700; text-decoration: none; }
+.login-nudge a:hover { text-decoration: underline; }
 
 /* ─── COMMENT THREAD ─── */
-.comment-thread {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+.comment-thread { padding: 0.25rem 0 0.5rem; }
+
+.no-comments { padding: 3rem 1.5rem; text-align: center; color: #c5bdb4; }
+.no-comments .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.no-comments p { font-size: 0.88rem; }
+
+/* ─── COMMENT ITEM ─── */
+.comment-item {
+    padding: 0.9rem 1.5rem;
+    position: relative;
+    transition: background 0.15s;
 }
+.comment-item:hover { background: #fdfcfb; }
 
-.comment {
-    padding: 1.1rem 0;
-    border-bottom: 1px solid #f0e9dc;
+/* Reddit-style indent line for replies */
+.comment-item.is-reply {
+    margin-left: 1.75rem;
+    padding-left: 1.25rem;
+    border-left: 2px solid transparent;
 }
+.comment-item[data-depth="1"] { border-left-color: #e85d26; }
+.comment-item[data-depth="2"] { border-left-color: #2d7d46; }
+.comment-item[data-depth="3"] { border-left-color: #2563eb; }
+.comment-item[data-depth="4"] { border-left-color: #7c3aed; }
+.comment-item[data-depth="5"] { border-left-color: #db2777; }
 
-.comment:last-child { border-bottom: none; }
-
-.comment-meta {
+.comment-top {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    margin-bottom: 0.5rem;
-    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-bottom: 0.4rem;
 }
 
-.comment-author {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #1a1a1a;
-}
-
-.comment-sep { color: #c5bdb4; font-size: 0.7rem; }
-
-.comment-time {
-    font-size: 0.75rem;
-    color: #8a7f74;
-}
+.comment-author { font-size: 0.82rem; font-weight: 700; color: #1a1a1a; }
+.comment-time { font-size: 0.72rem; color: #8a7f74; }
+.comment-edited { font-size: 0.68rem; color: #c5bdb4; font-style: italic; }
 
 .comment-body {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     line-height: 1.65;
-    color: #333;
-    margin-bottom: 0.65rem;
+    color: #374151;
+    margin-bottom: 0.5rem;
     white-space: pre-wrap;
 }
+.comment-body.deleted { color: #c5bdb4; font-style: italic; }
 
 .comment-actions {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.1rem;
     flex-wrap: wrap;
 }
 
-.comment-vote-btn {
-    width: 22px;
-    height: 22px;
-    border: none;
-    background: none;
-    display: flex;
+.c-vote-btn {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 5px;
-    cursor: pointer;
-    color: #c5bdb4;
-    transition: all 0.15s;
-    padding: 0;
-}
-
-.comment-vote-btn:hover { background: #f0e9dc; color: #1a1a1a; }
-.comment-vote-btn.up.voted   { color: #e85d26; }
-.comment-vote-btn.down.voted { color: #6b7280; }
-
-.comment-score {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #8a7f74;
-    min-width: 18px;
-    text-align: center;
-}
-
-.comment-score.pos { color: #e85d26; }
-.comment-score.neg { color: #6b7280; }
-
-.comment-action-btn {
-    background: none;
+    gap: 0.3rem;
+    padding: 0.28rem 0.5rem;
     border: none;
+    background: none;
+    border-radius: 6px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.75rem;
     font-weight: 600;
     color: #8a7f74;
     cursor: pointer;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
     transition: all 0.15s;
-    letter-spacing: 0.03em;
 }
+.c-vote-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.c-vote-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.c-vote-btn.voted-up { color: #e85d26; background: #fef0e8; }
+.c-vote-btn.voted-down { color: #6b7280; background: #f3f4f6; }
 
-.comment-action-btn:hover { color: #1a1a1a; background: #f0e9dc; }
-.comment-action-btn.danger:hover { color: #c0392b; background: rgba(192,57,43,0.08); }
-
-/* Login nudge */
-.login-nudge {
-    background: white;
-    border-radius: 14px;
-    border: 1px solid rgba(197,189,180,0.4);
-    padding: 1.5rem;
+.c-score {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    min-width: 16px;
     text-align: center;
+}
+.c-score.pos { color: #e85d26; }
+.c-score.neg { color: #6b7280; }
+
+.c-sep { width: 1px; height: 12px; background: #e5e1db; margin: 0 0.15rem; flex-shrink: 0; }
+
+.c-btn {
+    padding: 0.28rem 0.5rem;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: #8a7f74;
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
 }
+.c-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.c-btn.danger:hover { background: #fff5f5; color: #c0392b; }
 
-.login-nudge a { color: #e85d26; font-weight: 600; text-decoration: none; }
-.login-nudge a:hover { text-decoration: underline; }
-
-/* Empty comments */
-.no-comments {
-    padding: 2.5rem;
-    text-align: center;
-    color: #c5bdb4;
-    font-size: 0.9rem;
+.inline-edit-wrap { margin-top: 0.65rem; display: none; }
+.inline-edit-wrap textarea {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1.5px solid #e85d26;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: #1a1a1a;
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 80px;
+    background: white;
 }
+.inline-edit-wrap textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(232,93,38,0.1); }
 
-.no-comments .icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.reply-form-wrap { margin-top: 0.65rem; display: none; }
+
+.comment-divider { height: 1px; background: #f3f0eb; }
 
 @@media (max-width: 600px) {
-    .page-shell { padding: 0 1rem 3rem; }
-    .post-inner { grid-template-columns: 48px 1fr; }
-    .post-content { padding: 1.25rem; }
+    .forum-shell { padding: 1rem 0.25rem 3rem; }
+    .post-header, .post-content { padding-left: 1rem; padding-right: 1rem; }
+    .post-reactions { padding-left: 1rem; padding-right: 1rem; }
+    .comments-header, .add-comment-wrap, .comment-item { padding-left: 1rem; padding-right: 1rem; }
+    .comment-item.is-reply { margin-left: 0.75rem; padding-left: 0.75rem; }
 }
 </style>
 
-<div class="page-shell">
+<div class="forum-shell">
 
-    <!-- Breadcrumb -->
     <nav class="breadcrumb">
         <a asp-action="Index">Forum</a>
         <span class="breadcrumb-sep">/</span>
         <span>@Model.Title</span>
     </nav>
 
-    <!-- ── POST ── -->
+    <!-- ── POST CARD ── -->
     <div class="post-card">
-        <div class="post-inner">
-            <!-- Vote col -->
-            <div class="vote-col">
-                <button class="vote-btn up @(Model.UserVote == 1 ? "voted" : "")"
-                        onclick="votePost(@Model.Id, 1)" title="Upvote">
-                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="18 15 12 9 6 15"/>
-                    </svg>
-                </button>
-                <span class="vote-score @(Model.VoteScore > 0 ? "positive" : Model.VoteScore < 0 ? "negative" : "")"
-                      id="post-score">@Model.VoteScore</span>
-                <button class="vote-btn down @(Model.UserVote == -1 ? "voted" : "")"
-                        onclick="votePost(@Model.Id, -1)" title="Downvote">
-                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
+        <div class="post-header">
+            <div class="avatar" style="background:@AvatarColor(Model.AuthorName)">
+                @Initials(Model.AuthorName)
             </div>
-
-            <!-- Content -->
-            <div class="post-content">
-                <div class="post-top">
+            <div>
+                <div class="post-author-name">@Model.AuthorName</div>
+                <div class="post-author-meta">
+                    <span>@TimeAgo(Model.CreatedAt)</span>
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <span>· edited @TimeAgo(Model.UpdatedAt.Value)</span>
+                    }
                     @if (!string.IsNullOrEmpty(Model.FlairName))
                     {
                         <span class="post-flair"
@@ -499,96 +476,104 @@ body {
                             @Model.FlairName
                         </span>
                     }
-                    <span class="post-meta">
-                        Posted by
-                        <a asp-controller="Customer" asp-action="Profile" asp-route-id="@Model.AuthorId">@Model.AuthorName</a>
-                        · @TimeAgo(Model.CreatedAt)
-                        @if (Model.UpdatedAt.HasValue)
-                        {
-                            <span style="color:#c5bdb4"> · edited @TimeAgo(Model.UpdatedAt.Value)</span>
-                        }
-                    </span>
-                </div>
-
-                <h1 class="post-title">@Model.Title</h1>
-
-                @if (Model.RecipeId.HasValue)
-                {
-                    <a class="recipe-pill" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.RecipeId">
-                        🍴 <span>@Model.RecipeName</span>
-                    </a>
-                }
-
-                <div class="post-body-text">@Model.Body</div>
-
-                <div class="post-footer">
-                    <div class="post-stats">
-                        <div class="post-stat-item">
-                            <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                            </svg>
-                            @Model.Comments.Count comments
-                        </div>
-                    </div>
-
-                    @if (Model.CanEdit)
-                    {
-                        <div class="post-edit-actions">
-                            <a class="btn-edit btn-edit-outline"
-                               asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
-                            <form asp-action="Delete" method="post" style="display:inline"
-                                  onsubmit="return confirm('Delete this post?')">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@Model.Id" />
-                                <button type="submit" class="btn-edit btn-delete">Delete</button>
-                            </form>
-                        </div>
-                    }
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ── COMMENTS ── -->
-    <section class="comments-section" id="comments">
-        <div class="comments-header">
-            <h2 class="comments-title">Comments</h2>
-            <span class="comments-count">@Model.Comments.Count</span>
+        <div class="post-content">
+            <h1 class="post-title">@Model.Title</h1>
+            @if (Model.RecipeId.HasValue)
+            {
+                <a class="recipe-pill" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.RecipeId">
+                    🍴 @Model.RecipeName
+                </a>
+            }
+            <div class="post-body-text">@Model.Body</div>
         </div>
 
-        <!-- Add comment -->
+        <div class="post-reactions">
+            <button class="reaction-btn @(Model.UserVote == 1 ? "active-up" : "")"
+                    onclick="votePost(@Model.Id, 1)">
+                <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <span class="vote-score-display @(Model.VoteScore > 0 ? "pos" : Model.VoteScore < 0 ? "neg" : "")"
+                  id="post-score">@Model.VoteScore</span>
+            <button class="reaction-btn @(Model.UserVote == -1 ? "active-down" : "")"
+                    onclick="votePost(@Model.Id, -1)">
+                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="reaction-sep"></div>
+
+            <button class="reaction-btn" onclick="document.getElementById('main-comment-box').focus()">
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                @Model.Comments.Count Comments
+            </button>
+
+            @if (Model.CanEdit)
+            {
+                <div class="post-edit-btns">
+                    <a class="btn-sm" asp-action="Edit" asp-route-id="@Model.Id">✏️ Edit</a>
+                    <form asp-action="Delete" method="post" style="display:inline"
+                          onsubmit="return confirm('Delete this post?')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <button type="submit" class="btn-sm danger">🗑 Delete</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ── COMMENTS CARD ── -->
+    <div class="comments-section" id="comments">
+
+        <div class="comments-header">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a7f74" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span class="comments-title">Comments</span>
+            <span class="comments-count-badge">@Model.Comments.Count</span>
+        </div>
+
         @if (User.Identity?.IsAuthenticated == true)
         {
-            <div class="add-comment-card">
-                <span class="add-comment-label">Leave a comment</span>
-                <form asp-controller="ForumComment" asp-action="Add" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="ForumPostId" value="@Model.Id" />
-                    <textarea name="Body"
-                              class="comment-textarea"
-                              placeholder="Share your thoughts…"
-                              maxlength="5000"></textarea>
-                    <span asp-validation-for="NewComment.Body" class="text-danger" style="font-size:0.78rem"></span>
-                    <div class="comment-form-actions">
-                        <button type="submit" class="btn-comment-submit">Post Comment</button>
-                    </div>
-                </form>
+            <div class="add-comment-wrap">
+                <div class="avatar avatar-sm" style="background:@AvatarColor(User.Identity.Name ?? "U")">
+                    @Initials(User.Identity.Name ?? "U")
+                </div>
+                <div class="comment-input-col">
+                    <form asp-controller="ForumComment" asp-action="Add" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ForumPostId" value="@Model.Id" />
+                        <textarea name="Body"
+                                  class="comment-textarea"
+                                  id="main-comment-box"
+                                  placeholder="Write a comment…"
+                                  maxlength="5000"
+                                  required></textarea>
+                        <div class="comment-form-actions">
+                            <button type="submit" class="btn-post">Post Comment</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         }
         else
         {
             <div class="login-nudge">
-                <a asp-controller="Account" asp-action="Login">Sign in</a> to join the discussion.
+                💬 <a asp-controller="Account" asp-action="Login">Sign in</a> to join the discussion.
             </div>
         }
 
-        <!-- Thread -->
         <div class="comment-thread">
             @if (!Model.Comments.Any())
             {
                 <div class="no-comments">
                     <div class="icon">💬</div>
-                    No comments yet. Be the first!
+                    <p>No comments yet — be the first!</p>
                 </div>
             }
             else
@@ -599,11 +584,10 @@ body {
                 }
             }
         </div>
-    </section>
+    </div>
 </div>
 
 <script>
-// ─── Post voting ────────────────────────────────────────────────────────────
 async function votePost(postId, value) {
     try {
         const res  = await fetch('/Forum/Vote', {
@@ -613,19 +597,15 @@ async function votePost(postId, value) {
         });
         const data = await res.json();
         if (!data.success) return;
-
-        const scoreEl = document.getElementById('post-score');
-        if (scoreEl) {
-            scoreEl.textContent = data.newScore;
-            scoreEl.className   = 'vote-score' + (data.newScore > 0 ? ' positive' : data.newScore < 0 ? ' negative' : '');
-        }
-        document.querySelectorAll('.vote-col .vote-btn').forEach(b => b.classList.remove('voted'));
-        if (data.userVote === 1)  document.querySelector('.vote-btn.up')?.classList.add('voted');
-        if (data.userVote === -1) document.querySelector('.vote-btn.down')?.classList.add('voted');
+        const el = document.getElementById('post-score');
+        el.textContent = data.newScore;
+        el.className = 'vote-score-display' + (data.newScore > 0 ? ' pos' : data.newScore < 0 ? ' neg' : '');
+        document.querySelectorAll('.post-reactions .reaction-btn').forEach(b => b.classList.remove('active-up','active-down'));
+        if (data.userVote ===  1) document.querySelectorAll('.post-reactions .reaction-btn')[0]?.classList.add('active-up');
+        if (data.userVote === -1) document.querySelectorAll('.post-reactions .reaction-btn')[1]?.classList.add('active-down');
     } catch(e) { console.error(e); }
 }
 
-// ─── Comment voting ──────────────────────────────────────────────────────────
 async function voteComment(commentId, value) {
     try {
         const res  = await fetch('/ForumComment/Vote', {
@@ -635,33 +615,28 @@ async function voteComment(commentId, value) {
         });
         const data = await res.json();
         if (!data.success) return;
-
-        const scoreEl = document.getElementById(`comment-score-${commentId}`);
-        const comment = document.getElementById(`comment-${commentId}`);
-        if (scoreEl) {
-            scoreEl.textContent = data.newScore;
-            scoreEl.className   = 'comment-score' + (data.newScore > 0 ? ' pos' : data.newScore < 0 ? ' neg' : '');
-        }
-        if (comment) {
-            comment.querySelectorAll('.comment-vote-btn').forEach(b => b.classList.remove('voted'));
-            if (data.userVote === 1)  comment.querySelector('.comment-vote-btn.up')?.classList.add('voted');
-            if (data.userVote === -1) comment.querySelector('.comment-vote-btn.down')?.classList.add('voted');
+        const el = document.getElementById(`cs-${commentId}`);
+        if (el) { el.textContent = data.newScore; el.className = 'c-score' + (data.newScore > 0 ? ' pos' : data.newScore < 0 ? ' neg' : ''); }
+        const item = document.getElementById(`comment-${commentId}`);
+        if (item) {
+            item.querySelectorAll('.c-vote-btn').forEach(b => b.classList.remove('voted-up','voted-down'));
+            if (data.userVote ===  1) item.querySelector('.c-vote-btn.up')?.classList.add('voted-up');
+            if (data.userVote === -1) item.querySelector('.c-vote-btn.down')?.classList.add('voted-down');
         }
     } catch(e) { console.error(e); }
 }
 
-// ─── Edit / reply toggles ────────────────────────────────────────────────────
-function toggleEdit(commentId, show) {
-    document.getElementById(`edit-form-${commentId}`).style.display = show ? 'block' : 'none';
-    document.getElementById(`body-${commentId}`).style.display      = show ? 'none'  : 'block';
-    document.getElementById(`actions-${commentId}`).style.display   = show ? 'none'  : 'flex';
+function toggleReply(commentId) {
+    const wrap = document.getElementById(`reply-wrap-${commentId}`);
+    const show = wrap.style.display !== 'block';
+    wrap.style.display = show ? 'block' : 'none';
+    if (show) wrap.querySelector('textarea')?.focus();
 }
 
-function toggleReply(commentId) {
-    const form = document.getElementById(`reply-form-${commentId}`);
-    const isHidden = form.style.display === 'none';
-    form.style.display = isHidden ? 'block' : 'none';
-    if (isHidden) form.querySelector('textarea')?.focus();
+function toggleEdit(commentId, show) {
+    document.getElementById(`edit-wrap-${commentId}`).style.display  = show ? 'block' : 'none';
+    document.getElementById(`body-${commentId}`).style.display        = show ? 'none'  : 'block';
+    document.getElementById(`actions-${commentId}`).style.display     = show ? 'none'  : 'flex';
 }
 
 function getToken() {
@@ -670,15 +645,3 @@ function getToken() {
 </script>
 
 <form style="display:none">@Html.AntiForgeryToken()</form>
-
-@functions {
-    static string TimeAgo(DateTime dt)
-    {
-        var span = DateTime.UtcNow - dt.ToUniversalTime();
-        if (span.TotalMinutes < 1)  return "just now";
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
-        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
-        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
-        return dt.ToString("MMM d, yyyy");
-    }
-}

@@ -70,6 +70,7 @@ public class ForumCommentViewModel
     public int? ParentCommentId { get; set; }
     public bool IsDeleted { get; set; }
     public bool CanEdit { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public List<ForumCommentViewModel> Replies { get; set; } = [];
 }
 

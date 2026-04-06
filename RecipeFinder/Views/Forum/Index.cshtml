@@ -1,6 +1,25 @@
 @model RecipeFinder.ViewModels.Forum.ForumIndexViewModel
 @{
     ViewData["Title"] = "Community Forum";
+
+    string Initials(string name) =>
+        string.IsNullOrWhiteSpace(name) ? "?" : name[0].ToString().ToUpper();
+
+    string AvatarColor(string name)
+    {
+        var colors = new[] { "#e85d26","#2d7d46","#c17b1a","#2563eb","#7c3aed","#db2777","#0891b2" };
+        return colors[Math.Abs((name ?? "?").GetHashCode()) % colors.Length];
+    }
+
+    string TimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span.TotalMinutes < 1)  return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM d, yyyy");
+    }
 }
 
 <style>
@@ -8,384 +27,311 @@
 
 body {
     font-family: 'DM Sans', sans-serif;
-    background-color: #f9f5ef;
+    background: #f0ece4;
     color: #1a1a1a;
     -webkit-font-smoothing: antialiased;
 }
 
-.page-shell {
-    max-width: 1480px;
+.container { max-width: 100% !important; padding: 0 !important; }
+
+.forum-shell {
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 0 2rem 4rem;
+    padding: 1.5rem 1rem 4rem;
 }
 
 /* ─── HERO ─── */
-.page-hero {
-    position: relative;
-    padding: 1.75rem 0 1.5rem;
+.forum-hero {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
-    border-bottom: 1px solid #c5bdb4;
-    margin-bottom: 2rem;
-    overflow: hidden;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.page-hero::before {
-    content: 'FORUM';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(48px, 8vw, 110px);
-    font-weight: 300;
-    color: transparent;
-    -webkit-text-stroke: 1px rgba(139, 127, 116, 0.12);
-    white-space: nowrap;
-    pointer-events: none;
-    letter-spacing: 0.08em;
-    user-select: none;
-}
+.hero-left {}
 
 .hero-eyebrow {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.25em;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: #e85d26;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-
-.hero-eyebrow::before {
-    content: '';
-    display: block;
-    width: 32px;
-    height: 1px;
-    background: #e85d26;
+    margin-bottom: 0.3rem;
 }
 
 .hero-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
-    font-weight: 300;
-    line-height: 1;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700;
     color: #1a1a1a;
+    line-height: 1;
     letter-spacing: -0.02em;
 }
 
 .hero-title em { font-style: italic; color: #e85d26; }
 
-.hero-actions { position: relative; z-index: 1; }
+.hero-sub {
+    font-size: 0.82rem;
+    color: #8a7f74;
+    margin-top: 0.4rem;
+}
 
 .btn-new-post {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.7rem 1.4rem;
     background: #e85d26;
     color: white;
     border: none;
     border-radius: 10px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
 }
-
-.btn-new-post:hover {
-    background: #d44e1e;
-    transform: translateY(-1px);
-    color: white;
-    text-decoration: none;
-}
+.btn-new-post:hover { background: #d44e1e; transform: translateY(-1px); color: white; text-decoration: none; }
 
 /* ─── LAYOUT ─── */
-.content-layout {
+.forum-layout {
     display: grid;
     grid-template-columns: 220px 1fr;
-    gap: 2.5rem;
+    gap: 1rem;
     align-items: start;
 }
 
 /* ─── SIDEBAR ─── */
-.sidebar {
-    position: sticky;
-    top: 2rem;
-}
+.sidebar { position: sticky; top: 1.5rem; }
 
 .sidebar-card {
-    background: white;
+    background: #fff;
     border-radius: 14px;
-    border: 1px solid rgba(197,189,180,0.4);
-    padding: 1.25rem;
-    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+    padding: 1rem;
+    margin-bottom: 1rem;
 }
 
 .sidebar-card-title {
     font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 700;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: #8a7f74;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #f0e9dc;
-}
-
-/* Sort tabs */
-.sort-tabs {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #f3f0eb;
 }
 
 .sort-tab {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.6rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    gap: 0.55rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 9px;
+    font-size: 0.84rem;
     font-weight: 500;
     color: #8a7f74;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.15s;
+    margin-bottom: 0.15rem;
 }
-
-.sort-tab:hover {
-    background: #f9f5ef;
-    color: #1a1a1a;
-    text-decoration: none;
-}
-
-.sort-tab.active {
-    background: #fef0e8;
-    color: #e85d26;
-    font-weight: 600;
-}
-
-.sort-tab svg {
-    width: 15px;
-    height: 15px;
-    stroke: currentColor;
-    fill: none;
-    flex-shrink: 0;
-}
-
-/* Flair filter */
-.flair-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-}
+.sort-tab:hover { background: #f3f0eb; color: #1a1a1a; text-decoration: none; }
+.sort-tab.active { background: #fef0e8; color: #e85d26; font-weight: 700; }
 
 .flair-item {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 8px;
+    gap: 0.55rem;
+    padding: 0.48rem 0.7rem;
+    border-radius: 9px;
     font-size: 0.82rem;
+    font-weight: 500;
     color: #8a7f74;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.15s;
+    margin-bottom: 0.1rem;
 }
-
-.flair-item:hover { background: #f9f5ef; color: #1a1a1a; text-decoration: none; }
-
-.flair-item.active { background: #f9f5ef; color: #1a1a1a; font-weight: 500; }
+.flair-item:hover { background: #f3f0eb; color: #1a1a1a; text-decoration: none; }
+.flair-item.active { background: #f3f0eb; color: #1a1a1a; font-weight: 600; }
 
 .flair-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-/* ─── POST LIST ─── */
-.feed-header {
+/* ─── FEED ─── */
+.feed-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.75rem;
 }
 
 .feed-count {
     font-size: 0.78rem;
-    font-weight: 500;
     color: #8a7f74;
+    font-weight: 500;
 }
+.feed-count strong { color: #1a1a1a; font-weight: 700; }
 
-.feed-count strong { color: #1a1a1a; font-weight: 600; }
-
-.post-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-}
+.post-list { display: flex; flex-direction: column; gap: 0.75rem; }
 
 /* ─── POST CARD ─── */
 .post-card {
-    background: white;
+    background: #fff;
     border-radius: 14px;
-    border: 1px solid rgba(197,189,180,0.4);
-    display: grid;
-    grid-template-columns: 52px 1fr;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 2px 8px rgba(0,0,0,0.03);
     overflow: hidden;
-    transition: border-color 0.25s, box-shadow 0.25s;
-    animation: cardReveal 0.4s ease both;
+    transition: box-shadow 0.2s, transform 0.2s;
+    animation: cardIn 0.35s ease both;
 }
 
-@@keyframes cardReveal {
-    from { opacity: 0; transform: translateY(12px); }
+.post-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+@@keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.post-card:nth-child(1)  { animation-delay: 0.04s; }
-.post-card:nth-child(2)  { animation-delay: 0.08s; }
-.post-card:nth-child(3)  { animation-delay: 0.12s; }
-.post-card:nth-child(4)  { animation-delay: 0.16s; }
-.post-card:nth-child(5)  { animation-delay: 0.20s; }
-.post-card:nth-child(6)  { animation-delay: 0.24s; }
-.post-card:nth-child(7)  { animation-delay: 0.28s; }
-.post-card:nth-child(8)  { animation-delay: 0.32s; }
+.post-card:nth-child(1) { animation-delay: 0.03s; }
+.post-card:nth-child(2) { animation-delay: 0.06s; }
+.post-card:nth-child(3) { animation-delay: 0.09s; }
+.post-card:nth-child(4) { animation-delay: 0.12s; }
+.post-card:nth-child(5) { animation-delay: 0.15s; }
+.post-card:nth-child(6) { animation-delay: 0.18s; }
 
-.post-card:hover {
-    border-color: rgba(232,93,38,0.3);
-    box-shadow: 0 8px 32px rgba(26,26,26,0.06);
+.post-card-inner {
+    display: grid;
+    grid-template-columns: 52px 1fr;
 }
 
-/* Vote column */
+/* Vote col */
 .vote-col {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.25rem;
-    padding: 1rem 0;
+    gap: 0.2rem;
+    padding: 1.25rem 0;
     background: #fafaf8;
-    border-right: 1px solid #f0e9dc;
+    border-right: 1px solid #f3f0eb;
 }
 
 .vote-btn {
-    width: 26px;
-    height: 26px;
-    border: none;
-    background: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 28px; height: 28px;
+    border: none; background: none;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 6px;
     cursor: pointer;
     color: #c5bdb4;
     transition: all 0.15s;
 }
-
 .vote-btn:hover { background: #f0e9dc; color: #1a1a1a; }
 .vote-btn.up.voted   { color: #e85d26; }
 .vote-btn.down.voted { color: #6b7280; }
-
-.vote-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+.vote-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
 .vote-score {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: #1a1a1a;
-    line-height: 1;
-    min-width: 20px;
     text-align: center;
+    min-width: 20px;
 }
-
-.vote-score.positive { color: #e85d26; }
-.vote-score.negative { color: #6b7280; }
+.vote-score.pos { color: #e85d26; }
+.vote-score.neg { color: #6b7280; }
 
 /* Post body */
-.post-body {
-    padding: 1rem 1.25rem;
-    min-width: 0;
-}
+.post-body { padding: 1rem 1.25rem; min-width: 0; }
 
 .post-top {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     margin-bottom: 0.5rem;
     flex-wrap: wrap;
 }
 
-.post-flair {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.2rem 0.6rem;
-    border-radius: 100px;
-    font-size: 0.67rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    background: rgba(232,93,38,0.1);
-    color: #e85d26;
+.post-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: white;
     flex-shrink: 0;
 }
 
-.post-meta {
-    font-size: 0.73rem;
-    color: #8a7f74;
-}
+.post-author { font-size: 0.78rem; font-weight: 700; color: #1a1a1a; }
 
-.post-meta a { color: #8a7f74; text-decoration: none; font-weight: 500; }
-.post-meta a:hover { color: #e85d26; }
+.post-time { font-size: 0.72rem; color: #8a7f74; }
+
+.post-flair {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.5rem;
+    border-radius: 100px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
 
 .post-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: #1a1a1a;
     line-height: 1.2;
     margin-bottom: 0.4rem;
     text-decoration: none;
     display: block;
     letter-spacing: -0.01em;
-    transition: color 0.2s;
+    transition: color 0.15s;
 }
-
 .post-title:hover { color: #e85d26; text-decoration: none; }
 
 .post-preview {
     font-size: 0.85rem;
-    color: #8a7f74;
+    color: #6b7280;
     line-height: 1.55;
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.75rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-.post-recipe-link {
+.post-recipe-tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
     font-size: 0.75rem;
     color: #e85d26;
+    font-weight: 600;
     text-decoration: none;
-    margin-bottom: 0.85rem;
-    font-weight: 500;
+    margin-bottom: 0.75rem;
 }
-
-.post-recipe-link:hover { text-decoration: underline; }
+.post-recipe-tag:hover { text-decoration: underline; color: #e85d26; }
 
 .post-footer {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .post-stat {
@@ -394,146 +340,117 @@ body {
     gap: 0.35rem;
     font-size: 0.75rem;
     color: #8a7f74;
+    font-weight: 600;
     text-decoration: none;
-    font-weight: 500;
-    transition: color 0.15s;
+    padding: 0.28rem 0.55rem;
+    border-radius: 7px;
+    transition: all 0.15s;
 }
-
-.post-stat:hover { color: #1a1a1a; text-decoration: none; }
-
-.post-stat svg {
-    width: 13px; height: 13px;
-    stroke: currentColor; fill: none;
-}
+.post-stat:hover { background: #f3f0eb; color: #1a1a1a; text-decoration: none; }
+.post-stat svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ─── EMPTY STATE ─── */
 .empty-state {
-    padding: 5rem 2rem;
+    background: #fff;
+    border-radius: 14px;
+    padding: 4rem 2rem;
     text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07);
 }
-
-.empty-icon { font-size: 3.5rem; opacity: 0.3; margin-bottom: 1rem; }
-
-.empty-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.8rem;
-    font-weight: 400;
-    color: #8a7f74;
-    margin-bottom: 0.5rem;
-}
-
-.empty-sub { font-size: 0.9rem; color: #c5bdb4; line-height: 1.6; }
+.empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-title { font-family: 'Cormorant Garamond', serif; font-size: 1.75rem; font-weight: 600; color: #8a7f74; margin-bottom: 0.5rem; }
+.empty-sub { font-size: 0.88rem; color: #c5bdb4; }
 
 /* ─── PAGINATION ─── */
 .pagination-wrap {
-    margin-top: 2.5rem;
+    margin-top: 1.5rem;
     display: flex;
     justify-content: center;
-    gap: 0.4rem;
+    gap: 0.35rem;
 }
 
 .page-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 40px;
-    height: 40px;
-    padding: 0 0.75rem;
-    border: 1px solid #c5bdb4;
-    background: white;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 38px; height: 38px; padding: 0 0.7rem;
+    border: 1px solid #e5e1db;
+    background: #fff;
     color: #8a7f74;
     text-decoration: none;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    transition: all 0.2s;
+    transition: all 0.15s;
 }
-
-.page-link:hover { border-color: #1a1a1a; color: #1a1a1a; background: #f0e9dc; text-decoration: none; }
-.page-link.active { background: #1a1a1a; border-color: #1a1a1a; color: white; font-weight: 600; }
-.page-link.prev-next { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0 1rem; }
-.page-ellipsis { display: flex; align-items: center; color: #c5bdb4; padding: 0 0.25rem; }
+.page-link:hover { border-color: #1a1a1a; color: #1a1a1a; background: #f3f0eb; text-decoration: none; }
+.page-link.active { background: #1a1a1a; border-color: #1a1a1a; color: white; font-weight: 700; }
+.page-link.prev-next { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0 0.9rem; }
+.page-ellipsis { display: flex; align-items: center; color: #c5bdb4; padding: 0 0.2rem; }
 
 @@media (max-width: 860px) {
-    .content-layout { grid-template-columns: 1fr; }
+    .forum-layout { grid-template-columns: 1fr; }
     .sidebar { position: relative; top: 0; }
-    .sort-tabs { flex-direction: row; flex-wrap: wrap; }
 }
 
 @@media (max-width: 560px) {
-    .page-shell { padding: 0 1rem 3rem; }
-    .page-hero { flex-direction: column; align-items: flex-start; }
-    .page-hero::before { display: none; }
-    .post-card { grid-template-columns: 44px 1fr; }
+    .forum-shell { padding: 0.75rem 0.5rem 3rem; }
+    .forum-hero { padding: 1.1rem; }
+    .post-card-inner { grid-template-columns: 44px 1fr; }
 }
 </style>
 
-<div class="page-shell">
+<div class="forum-shell">
 
-    <div class="page-hero">
-        <div class="hero-title-group" style="position:relative;z-index:1">
+    <!-- Hero -->
+    <div class="forum-hero">
+        <div class="hero-left">
             <div class="hero-eyebrow">Community</div>
-            <h1 class="hero-title">Share &amp; <em>Discuss</em></h1>
+            <div class="hero-title">Share &amp; <em>Discuss</em></div>
+            <div class="hero-sub">@Model.TotalCount posts from the community</div>
         </div>
-        <div class="hero-actions">
-            <a asp-action="Create" class="btn-new-post">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                New Post
-            </a>
-        </div>
+        <a asp-action="Create" class="btn-new-post">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Post
+        </a>
     </div>
 
-    <div class="content-layout">
+    <div class="forum-layout">
 
         <!-- ── SIDEBAR ── -->
         <aside class="sidebar">
             <div class="sidebar-card">
-                <div class="sidebar-card-title">Sort By</div>
-                <div class="sort-tabs">
-                    <a class="sort-tab @(Model.Sort == "hot" ? "active" : "")"
-                       asp-action="Index" asp-route-sort="hot" asp-route-flairId="@Model.FilterFlairId">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" stroke-width="0" fill="currentColor"/></svg>
-                        🔥 Hot
-                    </a>
-                    <a class="sort-tab @(Model.Sort == "new" ? "active" : "")"
-                       asp-action="Index" asp-route-sort="new" asp-route-flairId="@Model.FilterFlairId">
-                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        New
-                    </a>
-                    <a class="sort-tab @(Model.Sort == "top" ? "active" : "")"
-                       asp-action="Index" asp-route-sort="top" asp-route-flairId="@Model.FilterFlairId">
-                        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                        Top
-                    </a>
-                </div>
+                <div class="sidebar-card-title">Sort</div>
+                <a class="sort-tab @(Model.Sort == "hot"  ? "active" : "")"
+                   asp-action="Index" asp-route-sort="hot"  asp-route-flairId="@Model.FilterFlairId">🔥 Hot</a>
+                <a class="sort-tab @(Model.Sort == "new"  ? "active" : "")"
+                   asp-action="Index" asp-route-sort="new"  asp-route-flairId="@Model.FilterFlairId">🆕 New</a>
+                <a class="sort-tab @(Model.Sort == "top"  ? "active" : "")"
+                   asp-action="Index" asp-route-sort="top"  asp-route-flairId="@Model.FilterFlairId">📈 Top</a>
             </div>
 
             @if (Model.Flairs.Any())
             {
                 <div class="sidebar-card">
-                    <div class="sidebar-card-title">Browse by Tag</div>
-                    <div class="flair-list">
-                        <a class="flair-item @(Model.FilterFlairId == null ? "active" : "")"
-                           asp-action="Index" asp-route-sort="@Model.Sort">
-                            <span class="flair-dot" style="background:#c5bdb4"></span>
-                            All Posts
+                    <div class="sidebar-card-title">Tags</div>
+                    <a class="flair-item @(Model.FilterFlairId == null ? "active" : "")"
+                       asp-action="Index" asp-route-sort="@Model.Sort">
+                        <span class="flair-dot" style="background:#c5bdb4"></span>
+                        All Posts
+                    </a>
+                    @foreach (var flair in Model.Flairs)
+                    {
+                        <a class="flair-item @(Model.FilterFlairId == flair.Id ? "active" : "")"
+                           asp-action="Index" asp-route-sort="@Model.Sort" asp-route-flairId="@flair.Id">
+                            <span class="flair-dot" style="background:@flair.ColorHex"></span>
+                            @flair.Name
                         </a>
-                        @foreach (var flair in Model.Flairs)
-                        {
-                            <a class="flair-item @(Model.FilterFlairId == flair.Id ? "active" : "")"
-                               asp-action="Index" asp-route-sort="@Model.Sort" asp-route-flairId="@flair.Id">
-                                <span class="flair-dot" style="background:@flair.ColorHex"></span>
-                                @flair.Name
-                            </a>
-                        }
-                    </div>
+                    }
                 </div>
             }
         </aside>
 
-        <!-- ── MAIN FEED ── -->
+        <!-- ── FEED ── -->
         <main>
-            <div class="feed-header">
+            <div class="feed-bar">
                 <div class="feed-count">
                     Showing <strong>@Model.Posts.Count()</strong> of <strong>@Model.TotalCount</strong> posts
                 </div>
@@ -544,7 +461,7 @@ body {
                 <div class="empty-state">
                     <div class="empty-icon">🍽</div>
                     <div class="empty-title">Nothing here yet</div>
-                    <div class="empty-sub">Be the first to share a recipe or start a discussion!</div>
+                    <div class="empty-sub">Be the first to start a discussion!</div>
                 </div>
             }
             else
@@ -552,69 +469,70 @@ body {
                 <div class="post-list">
                     @foreach (var post in Model.Posts)
                     {
-                        string scoreClass = post.VoteScore > 0 ? "positive" : post.VoteScore < 0 ? "negative" : "";
-                        string upClass    = post.UserVote == 1 ? "voted" : "";
-                        string downClass  = post.UserVote == -1 ? "voted" : "";
+                        string upClass   = post.UserVote == 1  ? "voted" : "";
+                        string downClass = post.UserVote == -1 ? "voted" : "";
+                        string scoreClass = post.VoteScore > 0 ? "pos" : post.VoteScore < 0 ? "neg" : "";
 
                         <article class="post-card" id="post-@post.Id">
-                            <!-- Vote column -->
-                            <div class="vote-col">
-                                <button class="vote-btn up @upClass"
-                                        onclick="votePost(@post.Id, 1)"
-                                        title="Upvote">
-                                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="18 15 12 9 6 15"/>
-                                    </svg>
-                                </button>
-                                <span class="vote-score @scoreClass" id="score-post-@post.Id">@post.VoteScore</span>
-                                <button class="vote-btn down @downClass"
-                                        onclick="votePost(@post.Id, -1)"
-                                        title="Downvote">
-                                    <svg viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 12 15 18 9"/>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="post-body">
-                                <div class="post-top">
-                                    @if (!string.IsNullOrEmpty(post.FlairName))
-                                    {
-                                        <span class="post-flair" style="background:@(post.FlairColorHex + "22");color:@post.FlairColorHex">
-                                            @post.FlairName
-                                        </span>
-                                    }
-                                    <span class="post-meta">
-                                        by <a asp-controller="Customer" asp-action="Profile" asp-route-id="@post.AuthorId">@post.AuthorName</a>
-                                        · @TimeAgo(post.CreatedAt)
-                                    </span>
+                            <div class="post-card-inner">
+                                <!-- Vote -->
+                                <div class="vote-col">
+                                    <button class="vote-btn up @upClass"
+                                            onclick="votePost(@post.Id, 1)">
+                                        <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                                    </button>
+                                    <span class="vote-score @scoreClass"
+                                          id="score-@post.Id">@post.VoteScore</span>
+                                    <button class="vote-btn down @downClass"
+                                            onclick="votePost(@post.Id, -1)">
+                                        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                                    </button>
                                 </div>
 
-                                <a class="post-title" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
-                                <p class="post-preview">@post.BodyPreview</p>
+                                <!-- Content -->
+                                <div class="post-body">
+                                    <div class="post-top">
+                                        <div class="post-avatar"
+                                             style="background:@(string.Join("", post.AuthorName.Take(1).Select(c => { var colors = new[]{"#e85d26","#2d7d46","#c17b1a","#2563eb","#7c3aed","#db2777","#0891b2"}; return colors[Math.Abs(post.AuthorName.GetHashCode()) % colors.Length]; })))">
+                                            @(post.AuthorName.Length > 0 ? post.AuthorName[0].ToString().ToUpper() : "?")
+                                        </div>
+                                        <span class="post-author">@post.AuthorName</span>
+                                        <span class="post-time">@TimeAgo(post.CreatedAt)</span>
+                                        @if (!string.IsNullOrEmpty(post.FlairName))
+                                        {
+                                            <span class="post-flair"
+                                                  style="background:@(post.FlairColorHex + "22");color:@post.FlairColorHex">
+                                                @post.FlairName
+                                            </span>
+                                        }
+                                    </div>
 
-                                @if (post.RecipeId.HasValue)
-                                {
-                                    <a class="post-recipe-link" asp-controller="Recipe" asp-action="Details" asp-route-id="@post.RecipeId">
-                                        🍴 @post.RecipeName
+                                    <a class="post-title" asp-action="Details" asp-route-id="@post.Id">
+                                        @post.Title
                                     </a>
-                                }
 
-                                <div class="post-footer">
-                                    <a class="post-stat" asp-action="Details" asp-route-id="@post.Id" asp-fragment="comments">
-                                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                        </svg>
-                                        @post.CommentCount comments
-                                    </a>
-                                    <a class="post-stat" asp-action="Details" asp-route-id="@post.Id">
-                                        <svg viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                                            <line x1="5" y1="12" x2="19" y2="12"/>
-                                            <polyline points="12 5 19 12 12 19"/>
-                                        </svg>
-                                        Read more
-                                    </a>
+                                    <p class="post-preview">@post.BodyPreview</p>
+
+                                    @if (post.RecipeId.HasValue)
+                                    {
+                                        <a class="post-recipe-tag"
+                                           asp-controller="Recipe" asp-action="Details" asp-route-id="@post.RecipeId">
+                                            🍴 @post.RecipeName
+                                        </a>
+                                    }
+
+                                    <div class="post-footer">
+                                        <a class="post-stat"
+                                           asp-action="Details" asp-route-id="@post.Id"
+                                           asp-fragment="comments">
+                                            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                                            @post.CommentCount comments
+                                        </a>
+                                        <a class="post-stat" asp-action="Details" asp-route-id="@post.Id">
+                                            <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                            Read more
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </article>
@@ -622,13 +540,10 @@ body {
                 </div>
             }
 
-            <!-- Pagination -->
             @if (Model.TotalPages > 1)
             {
-                string PageUrl(int pg) =>
-                    $"?sort={Model.Sort}&page={pg}&flairId={Model.FilterFlairId}";
-
-                <nav class="pagination-wrap" aria-label="Pagination">
+                string PageUrl(int pg) => $"?sort={Model.Sort}&page={pg}&flairId={Model.FilterFlairId}";
+                <nav class="pagination-wrap">
                     @if (Model.CurrentPage > 1)
                     {
                         <a class="page-link prev-next" href="@PageUrl(Model.CurrentPage - 1)">← Prev</a>
@@ -665,19 +580,18 @@ async function votePost(postId, value) {
         const data = await res.json();
         if (!data.success) return;
 
-        const scoreEl = document.getElementById(`score-post-${postId}`);
+        const scoreEl = document.getElementById(`score-${postId}`);
         const card    = document.getElementById(`post-${postId}`);
         if (scoreEl) {
             scoreEl.textContent = data.newScore;
-            scoreEl.className   = 'vote-score' + (data.newScore > 0 ? ' positive' : data.newScore < 0 ? ' negative' : '');
+            scoreEl.className   = 'vote-score' + (data.newScore > 0 ? ' pos' : data.newScore < 0 ? ' neg' : '');
         }
-        // Update button active states
-        card.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('voted'));
-        if (data.userVote === 1)  card.querySelector('.vote-btn.up')?.classList.add('voted');
-        if (data.userVote === -1) card.querySelector('.vote-btn.down')?.classList.add('voted');
-    } catch (e) {
-        console.error(e);
-    }
+        if (card) {
+            card.querySelectorAll('.vote-btn').forEach(b => b.classList.remove('voted'));
+            if (data.userVote ===  1) card.querySelector('.vote-btn.up')?.classList.add('voted');
+            if (data.userVote === -1) card.querySelector('.vote-btn.down')?.classList.add('voted');
+        }
+    } catch(e) { console.error(e); }
 }
 
 function getToken() {
@@ -685,19 +599,4 @@ function getToken() {
 }
 </script>
 
-@* Hidden antiforgery token available for fetch calls *@
-<form style="display:none">
-    @Html.AntiForgeryToken()
-</form>
-
-@functions {
-    static string TimeAgo(DateTime dt)
-    {
-        var span = DateTime.UtcNow - dt.ToUniversalTime();
-        if (span.TotalMinutes < 1)  return "just now";
-        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
-        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
-        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
-        return dt.ToString("MMM d, yyyy");
-    }
-}
+<form style="display:none">@Html.AntiForgeryToken()</form>
