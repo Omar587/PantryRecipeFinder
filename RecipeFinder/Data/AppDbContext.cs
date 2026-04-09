@@ -31,6 +31,18 @@ public class AppDbContext : IdentityDbContext<Customer, IdentityRole<int>, int>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        
+        // ── Flair seed data ────────────────────────────────────
+        modelBuilder.Entity<ForumFlair>().HasData(
+            new ForumFlair { Id = 1, Name = "🍳 General Cooking",    ColorHex = "#e85d26" },
+            new ForumFlair { Id = 2, Name = "📖 Recipe Share",        ColorHex = "#2d7d46" },
+            new ForumFlair { Id = 3, Name = "🙋 Recipe Requests",     ColorHex = "#2563eb" },
+            new ForumFlair { Id = 4, Name = "🔪 Tips & Techniques",   ColorHex = "#b5550a" },
+            new ForumFlair { Id = 5, Name = "🌱 Vegetarian & Vegan",  ColorHex = "#16a34a" },
+            new ForumFlair { Id = 6, Name = "🌍 World Cuisines",      ColorHex = "#7c3aed" },
+            new ForumFlair { Id = 7, Name = "📸 Food Photography",    ColorHex = "#db2777" },
+            new ForumFlair { Id = 8, Name = "💬 Site Feedback",       ColorHex = "#0891b2" }
+        );
 
         // ── Existing constraints ───────────────────────────────
         modelBuilder.Entity<FavoriteRecipe>()

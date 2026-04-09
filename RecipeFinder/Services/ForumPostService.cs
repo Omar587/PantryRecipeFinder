@@ -55,7 +55,7 @@ public class ForumPostService : IForumPostService
         }
 
         var postVms = posts.Select(p => MapToListItem(p, currentCustomerId));
-        var flairs  = await _db.ForumFlairs.OrderBy(f => f.Name).ToListAsync();
+        var flairs  = await _db.ForumFlairs.OrderBy(f => f.Id).ToListAsync();
 
         return new ForumIndexViewModel
         {
