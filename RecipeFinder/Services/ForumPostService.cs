@@ -119,6 +119,8 @@ public class ForumPostService : IForumPostService
             RecipeName    = post.Recipe?.Name,
             RecipeId      = post.RecipeId,
             CanEdit       = currentCustomerId == post.CustomerId,
+            TotalCommentCount = post.Comments.Count(c => !c.IsDeleted),         // ← add this
+            Flairs = await _db.ForumFlairs.OrderBy(f => f.Id).ToListAsync(),
             Comments      = post.Comments
                               .Where(c => c.ParentCommentId == null)
                               .OrderByDescending(c => c.Votes.Sum(v => v.Value))

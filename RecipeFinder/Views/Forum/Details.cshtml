@@ -26,19 +26,14 @@
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    font-family: 'DM Sans', sans-serif;
-    background: #f9f5ef;
-    color: #1a1a1a;
-    -webkit-font-smoothing: antialiased;
+body, .container, main, .pb-5, .mt-4 {
+    background: #f9f5ef !important;
 }
 
-.container { max-width: 100% !important; padding: 0 !important; }
-
 .forum-shell {
-    max-width: 780px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 1.5rem 1rem 4rem;
+    padding: 1.5rem 1.5rem 4rem;
 }
 
 .breadcrumb {
@@ -55,11 +50,98 @@ body {
 .breadcrumb a:hover { color: #e85d26; }
 .breadcrumb-sep { color: #c5bdb4; }
 
+/* ─── LAYOUT ─── */
+.detail-layout {
+    display: grid;
+    grid-template-columns: 205px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* ─── SIDEBAR ─── */
+.d-sidebar { position: sticky; top: 1.5rem; }
+
+.d-sidebar-section {
+    background: #fdf8f2;
+    border-radius: 14px;
+    border: 1px solid rgba(180,145,100,0.2);
+    overflow: hidden;
+    margin-bottom: 0.85rem;
+    box-shadow: 0 1px 3px rgba(100,70,30,0.06);
+}
+
+.d-sidebar-head {
+    padding: 0.8rem 1rem;
+    background: #f5ede0;
+    border-bottom: 1px solid rgba(180,145,100,0.18);
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.d-sidebar-head-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #e85d26;
+    flex-shrink: 0;
+}
+
+.d-sidebar-head-title {
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #7a6550;
+}
+
+.d-sidebar-body { padding: 0.4rem; }
+
+.d-flair-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.52rem 0.7rem;
+    border-radius: 9px;
+    font-size: 0.79rem;
+    font-weight: 500;
+    color: #6b5740;
+    text-decoration: none;
+    transition: all 0.15s;
+    margin-bottom: 0.05rem;
+}
+.d-flair-item:hover { background: #f0e6d6; color: #2a1f14; text-decoration: none; }
+
+.d-flair-pip {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.d-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 9px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #6b5740;
+    text-decoration: none;
+    transition: all 0.15s;
+    background: #fdf8f2;
+    border: 1px solid rgba(180,145,100,0.2);
+    margin-bottom: 0.85rem;
+    box-shadow: 0 1px 3px rgba(100,70,30,0.06);
+}
+.d-back-btn:hover { background: #f0e6d6; color: #2a1f14; text-decoration: none; }
+.d-back-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
 /* ─── POST CARD ─── */
 .post-card {
-    background: #fff;
+    background: #fdf8f2;
     border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid rgba(180,145,100,0.2);
+    box-shadow: 0 1px 3px rgba(100,70,30,0.06), 0 4px 16px rgba(100,70,30,0.05);
     margin-bottom: 1rem;
     overflow: hidden;
 }
@@ -81,6 +163,7 @@ body {
     font-weight: 700;
     color: white;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
 .avatar-sm { width: 34px; height: 34px; font-size: 0.78rem; }
@@ -151,7 +234,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.2rem;
-    border-top: 1px solid #f3f0eb;
+    border-top: 1px solid rgba(180,145,100,0.14);
     margin-top: 0.75rem;
     flex-wrap: wrap;
 }
@@ -171,7 +254,7 @@ body {
     cursor: pointer;
     transition: all 0.15s;
 }
-.reaction-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.reaction-btn:hover { background: #f0e6d6; color: #1a1a1a; }
 .reaction-btn.active-up { color: #e85d26; background: #fef0e8; }
 .reaction-btn.active-down { color: #6b7280; background: #f3f4f6; }
 .reaction-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -187,7 +270,7 @@ body {
 .vote-score-display.pos { color: #e85d26; }
 .vote-score-display.neg { color: #6b7280; }
 
-.reaction-sep { width: 1px; height: 18px; background: #e5e1db; margin: 0 0.2rem; flex-shrink: 0; }
+.reaction-sep { width: 1px; height: 18px; background: rgba(180,145,100,0.28); margin: 0 0.2rem; flex-shrink: 0; }
 
 .post-edit-btns { margin-left: auto; display: flex; gap: 0.4rem; }
 
@@ -203,7 +286,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    border: 1px solid #c5bdb4;
+    border: 1px solid rgba(180,145,100,0.3);
     background: transparent;
     color: #8a7f74;
 }
@@ -213,38 +296,42 @@ body {
 
 /* ─── COMMENTS SECTION ─── */
 .comments-section {
-    background: #fff;
+    background: #fdf8f2;
     border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid rgba(180,145,100,0.2);
+    box-shadow: 0 1px 3px rgba(100,70,30,0.06), 0 4px 16px rgba(100,70,30,0.05);
     overflow: hidden;
 }
 
 .comments-header {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f3f0eb;
+    border-bottom: 1px solid rgba(180,145,100,0.14);
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    background: #f5ede0;
 }
 
 .comments-title { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; }
 
 .comments-count-badge {
     padding: 0.18rem 0.55rem;
-    background: #f3f0eb;
-    color: #8a7f74;
+    background: rgba(180,145,100,0.18);
+    color: #7a6550;
     border-radius: 100px;
     font-size: 0.72rem;
     font-weight: 700;
+    border: 1px solid rgba(180,145,100,0.2);
 }
 
 /* ─── ADD COMMENT ─── */
 .add-comment-wrap {
     padding: 1rem 1.5rem;
-    border-bottom: 1px solid #f3f0eb;
+    border-bottom: 1px solid rgba(180,145,100,0.12);
     display: flex;
     gap: 0.85rem;
     align-items: flex-start;
+    background: #f9f3ea;
 }
 
 .comment-input-col { flex: 1; min-width: 0; }
@@ -252,9 +339,9 @@ body {
 .comment-textarea {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1.5px solid #e5e1db;
+    border: 1.5px solid rgba(180,145,100,0.3);
     border-radius: 12px;
-    background: #fafaf8;
+    background: #fdf8f2;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.88rem;
     color: #1a1a1a;
@@ -270,7 +357,7 @@ body {
     background: white;
     min-height: 110px;
 }
-.comment-textarea::placeholder { color: #c5bdb4; }
+.comment-textarea::placeholder { color: #c4b09a; }
 
 .comment-form-actions {
     display: flex;
@@ -290,14 +377,15 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(232,93,38,0.25);
 }
-.btn-post:hover { background: #d44e1e; transform: translateY(-1px); }
+.btn-post:hover { background: #d14f1e; transform: translateY(-1px); }
 
 .btn-cancel-inline {
     padding: 0.52rem 0.9rem;
     background: transparent;
     color: #8a7f74;
-    border: 1.5px solid #e5e1db;
+    border: 1.5px solid rgba(180,145,100,0.3);
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
@@ -309,10 +397,10 @@ body {
 
 .login-nudge {
     padding: 1.1rem 1.5rem;
-    border-bottom: 1px solid #f3f0eb;
+    border-bottom: 1px solid rgba(180,145,100,0.12);
     font-size: 0.88rem;
     color: #8a7f74;
-    background: #fafaf8;
+    background: #f9f3ea;
 }
 .login-nudge a { color: #e85d26; font-weight: 700; text-decoration: none; }
 .login-nudge a:hover { text-decoration: underline; }
@@ -320,8 +408,8 @@ body {
 /* ─── COMMENT THREAD ─── */
 .comment-thread { padding: 0.25rem 0 0.5rem; }
 
-.no-comments { padding: 3rem 1.5rem; text-align: center; color: #c5bdb4; }
-.no-comments .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.no-comments { padding: 3rem 1.5rem; text-align: center; color: #c4b09a; }
+.no-comments .icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
 .no-comments p { font-size: 0.88rem; }
 
 /* ─── COMMENT ITEM ─── */
@@ -330,9 +418,8 @@ body {
     position: relative;
     transition: background 0.15s;
 }
-.comment-item:hover { background: #fdfcfb; }
+.comment-item:hover { background: #fdf3e8; }
 
-/* Reddit-style indent line for replies */
 .comment-item.is-reply {
     margin-left: 1.75rem;
     padding-left: 1.25rem;
@@ -353,16 +440,16 @@ body {
 
 .comment-author { font-size: 0.82rem; font-weight: 700; color: #1a1a1a; }
 .comment-time { font-size: 0.72rem; color: #8a7f74; }
-.comment-edited { font-size: 0.68rem; color: #c5bdb4; font-style: italic; }
+.comment-edited { font-size: 0.68rem; color: #c4b09a; font-style: italic; }
 
 .comment-body {
     font-size: 0.88rem;
     line-height: 1.65;
-    color: #374151;
+    color: #5c4a35;
     margin-bottom: 0.5rem;
     white-space: pre-wrap;
 }
-.comment-body.deleted { color: #c5bdb4; font-style: italic; }
+.comment-body.deleted { color: #c4b09a; font-style: italic; }
 
 .comment-actions {
     display: flex;
@@ -387,7 +474,7 @@ body {
     transition: all 0.15s;
 }
 .c-vote-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.c-vote-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.c-vote-btn:hover { background: #f0e6d6; color: #1a1a1a; }
 .c-vote-btn.voted-up { color: #e85d26; background: #fef0e8; }
 .c-vote-btn.voted-down { color: #6b7280; background: #f3f4f6; }
 
@@ -401,7 +488,7 @@ body {
 .c-score.pos { color: #e85d26; }
 .c-score.neg { color: #6b7280; }
 
-.c-sep { width: 1px; height: 12px; background: #e5e1db; margin: 0 0.15rem; flex-shrink: 0; }
+.c-sep { width: 1px; height: 12px; background: rgba(180,145,100,0.28); margin: 0 0.15rem; flex-shrink: 0; }
 
 .c-btn {
     padding: 0.28rem 0.5rem;
@@ -415,7 +502,7 @@ body {
     cursor: pointer;
     transition: all 0.15s;
 }
-.c-btn:hover { background: #f3f0eb; color: #1a1a1a; }
+.c-btn:hover { background: #f0e6d6; color: #1a1a1a; }
 .c-btn.danger:hover { background: #fff5f5; color: #c0392b; }
 
 .inline-edit-wrap { margin-top: 0.65rem; display: none; }
@@ -436,10 +523,15 @@ body {
 
 .reply-form-wrap { margin-top: 0.65rem; display: none; }
 
-.comment-divider { height: 1px; background: #f3f0eb; }
+.comment-divider { height: 1px; background: rgba(180,145,100,0.12); }
+
+@@media (max-width: 860px) {
+    .detail-layout { grid-template-columns: 1fr; }
+    .d-sidebar { position: relative; top: 0; }
+}
 
 @@media (max-width: 600px) {
-    .forum-shell { padding: 1rem 0.25rem 3rem; }
+    .forum-shell { padding: 1rem 0.75rem 3rem; }
     .post-header, .post-content { padding-left: 1rem; padding-right: 1rem; }
     .post-reactions { padding-left: 1rem; padding-right: 1rem; }
     .comments-header, .add-comment-wrap, .comment-item { padding-left: 1rem; padding-right: 1rem; }
@@ -455,134 +547,194 @@ body {
         <span>@Model.Title</span>
     </nav>
 
-    <!-- ── POST CARD ── -->
-    <div class="post-card">
-        <div class="post-header">
-            <div class="avatar" style="background:@AvatarColor(Model.AuthorName)">
-                @Initials(Model.AuthorName)
-            </div>
-            <div>
-                <div class="post-author-name">@Model.AuthorName</div>
-                <div class="post-author-meta">
-                    <span>@TimeAgo(Model.CreatedAt)</span>
-                    @if (Model.UpdatedAt.HasValue)
-                    {
-                        <span>· edited @TimeAgo(Model.UpdatedAt.Value)</span>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.FlairName))
-                    {
-                        <span class="post-flair"
-                              style="background:@(Model.FlairColorHex + "22");color:@Model.FlairColorHex">
-                            @Model.FlairName
-                        </span>
-                    }
-                </div>
-            </div>
-        </div>
+    <div class="detail-layout">
 
-        <div class="post-content">
-            <h1 class="post-title">@Model.Title</h1>
-            @if (Model.RecipeId.HasValue)
+        <!-- ── SIDEBAR ── -->
+        <aside class="d-sidebar">
+
+            <a asp-action="Index" class="d-back-btn">
+                <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                Back to Forum
+            </a>
+
+            @if (Model.Flairs.Any())
             {
-                <a class="recipe-pill" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.RecipeId">
-                    🍴 @Model.RecipeName
-                </a>
-            }
-            <div class="post-body-text">@Model.Body</div>
-        </div>
-
-        <div class="post-reactions">
-            <button class="reaction-btn @(Model.UserVote == 1 ? "active-up" : "")"
-                    onclick="votePost(@Model.Id, 1)">
-                <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
-            </button>
-            <span class="vote-score-display @(Model.VoteScore > 0 ? "pos" : Model.VoteScore < 0 ? "neg" : "")"
-                  id="post-score">@Model.VoteScore</span>
-            <button class="reaction-btn @(Model.UserVote == -1 ? "active-down" : "")"
-                    onclick="votePost(@Model.Id, -1)">
-                <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-
-            <div class="reaction-sep"></div>
-
-            <button class="reaction-btn" onclick="document.getElementById('main-comment-box').focus()">
-                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
-                @Model.Comments.Count Comments
-            </button>
-
-            @if (Model.CanEdit)
-            {
-                <div class="post-edit-btns">
-                    <a class="btn-sm" asp-action="Edit" asp-route-id="@Model.Id">✏️ Edit</a>
-                    <form asp-action="Delete" method="post" style="display:inline"
-                          onsubmit="return confirm('Delete this post?')">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@Model.Id" />
-                        <button type="submit" class="btn-sm danger">🗑 Delete</button>
-                    </form>
+                <div class="d-sidebar-section">
+                    <div class="d-sidebar-head">
+                        <span class="d-sidebar-head-dot" style="background:#2d6a4f"></span>
+                        <span class="d-sidebar-head-title">Browse Topics</span>
+                    </div>
+                    <div class="d-sidebar-body">
+                        <a class="d-flair-item" asp-controller="Forum" asp-action="Index">
+                            <span class="d-flair-pip" style="background:#a8927a"></span>
+                            All Posts
+                        </a>
+                        @foreach (var flair in Model.Flairs)
+                        {
+                            <a class="d-flair-item"
+                               asp-controller="Forum" asp-action="Index"
+                               asp-route-flairId="@flair.Id">
+                                <span class="d-flair-pip" style="background:@flair.ColorHex"></span>
+                                @flair.Name
+                            </a>
+                        }
+                    </div>
                 </div>
             }
-        </div>
-    </div>
 
-    <!-- ── COMMENTS CARD ── -->
-    <div class="comments-section" id="comments">
-
-        <div class="comments-header">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a7f74" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
-            <span class="comments-title">Comments</span>
-            <span class="comments-count-badge">@Model.Comments.Count</span>
-        </div>
-
-        @if (User.Identity?.IsAuthenticated == true)
-        {
-            <div class="add-comment-wrap">
-                <div class="avatar avatar-sm" style="background:@AvatarColor(User.Identity.Name ?? "U")">
-                    @Initials(User.Identity.Name ?? "U")
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="d-sidebar-section">
+                    <div class="d-sidebar-head">
+                        <span class="d-sidebar-head-dot"></span>
+                        <span class="d-sidebar-head-title">Post</span>
+                    </div>
+                    <div class="d-sidebar-body" style="padding:0.6rem;">
+                        <a asp-controller="Forum" asp-action="Create"
+                           style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.75rem;background:#e85d26;color:white;border-radius:9px;font-size:0.8rem;font-weight:700;text-decoration:none;transition:background 0.15s;box-shadow:0 2px 8px rgba(232,93,38,0.25);">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            New Post
+                        </a>
+                    </div>
                 </div>
-                <div class="comment-input-col">
-                    <form asp-controller="ForumComment" asp-action="Add" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="ForumPostId" value="@Model.Id" />
-                        <textarea name="Body"
-                                  class="comment-textarea"
-                                  id="main-comment-box"
-                                  placeholder="Write a comment…"
-                                  maxlength="5000"
-                                  required></textarea>
-                        <div class="comment-form-actions">
-                            <button type="submit" class="btn-post">Post Comment</button>
+            }
+
+        </aside>
+
+        <!-- ── MAIN CONTENT ── -->
+        <div>
+
+            <!-- ── POST CARD ── -->
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="avatar" style="background:@AvatarColor(Model.AuthorName)">
+                        @Initials(Model.AuthorName)
+                    </div>
+                    <div>
+                        <div class="post-author-name">@Model.AuthorName</div>
+                        <div class="post-author-meta">
+                            <span>@TimeAgo(Model.CreatedAt)</span>
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <span>· edited @TimeAgo(Model.UpdatedAt.Value)</span>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.FlairName))
+                            {
+                                <span class="post-flair"
+                                      style="background:@(Model.FlairColorHex + "22");color:@Model.FlairColorHex">
+                                    @Model.FlairName
+                                </span>
+                            }
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="login-nudge">
-                💬 <a asp-controller="Account" asp-action="Login">Sign in</a> to join the discussion.
-            </div>
-        }
 
-        <div class="comment-thread">
-            @if (!Model.Comments.Any())
-            {
-                <div class="no-comments">
-                    <div class="icon">💬</div>
-                    <p>No comments yet — be the first!</p>
+                <div class="post-content">
+                    <h1 class="post-title">@Model.Title</h1>
+                    @if (Model.RecipeId.HasValue)
+                    {
+                        <a class="recipe-pill" asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.RecipeId">
+                            🍴 @Model.RecipeName
+                        </a>
+                    }
+                    <div class="post-body-text">@Model.Body</div>
                 </div>
-            }
-            else
-            {
-                foreach (var comment in Model.Comments)
+
+                <div class="post-reactions">
+                    <button class="reaction-btn @(Model.UserVote == 1 ? "active-up" : "")"
+                            onclick="votePost(@Model.Id, 1)">
+                        <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                    </button>
+                    <span class="vote-score-display @(Model.VoteScore > 0 ? "pos" : Model.VoteScore < 0 ? "neg" : "")"
+                          id="post-score">@Model.VoteScore</span>
+                    <button class="reaction-btn @(Model.UserVote == -1 ? "active-down" : "")"
+                            onclick="votePost(@Model.Id, -1)">
+                        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+
+                    <div class="reaction-sep"></div>
+
+                    <button class="reaction-btn" onclick="document.getElementById('main-comment-box').focus()">
+                        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        @Model.TotalCommentCount @(Model.TotalCommentCount == 1 ? "Comment" : "Comments")
+                    </button>
+
+                    @if (Model.CanEdit)
+                    {
+                        <div class="post-edit-btns">
+                            <a class="btn-sm" asp-action="Edit" asp-route-id="@Model.Id">✏️ Edit</a>
+                            <form asp-action="Delete" method="post" style="display:inline"
+                                  onsubmit="return confirm('Delete this post?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@Model.Id" />
+                                <button type="submit" class="btn-sm danger">🗑 Delete</button>
+                            </form>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ── COMMENTS CARD ── -->
+            <div class="comments-section" id="comments">
+
+                <div class="comments-header">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7a6550" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    <span class="comments-title">Comments</span>
+                    <span class="comments-count-badge">@Model.TotalCommentCount</span>
+                </div>
+
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    @await Html.PartialAsync("_CommentPartial", comment, ViewData)
+                    <div class="add-comment-wrap">
+                        <div class="avatar avatar-sm" style="background:@AvatarColor(User.Identity.Name ?? "U")">
+                            @Initials(User.Identity.Name ?? "U")
+                        </div>
+                        <div class="comment-input-col">
+                            <form asp-controller="ForumComment" asp-action="Add" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ForumPostId" value="@Model.Id" />
+                                <textarea name="Body"
+                                          class="comment-textarea"
+                                          id="main-comment-box"
+                                          placeholder="Write a comment…"
+                                          maxlength="5000"
+                                          required></textarea>
+                                <div class="comment-form-actions">
+                                    <button type="submit" class="btn-post">Post Comment</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 }
-            }
+                else
+                {
+                    <div class="login-nudge">
+                        💬 <a asp-controller="Account" asp-action="Login">Sign in</a> to join the discussion.
+                    </div>
+                }
+
+                <div class="comment-thread">
+                    @if (!Model.Comments.Any())
+                    {
+                        <div class="no-comments">
+                            <span class="icon">💬</span>
+                            <p>No comments yet — be the first!</p>
+                        </div>
+                    }
+                    else
+                    {
+                        foreach (var comment in Model.Comments)
+                        {
+                            @await Html.PartialAsync("_CommentPartial", comment, ViewData)
+                        }
+                    }
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

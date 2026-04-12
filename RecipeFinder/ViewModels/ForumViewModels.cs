@@ -52,6 +52,8 @@ public class ForumPostDetailViewModel
     public string? RecipeName { get; set; }
     public int? RecipeId { get; set; }
     public bool CanEdit { get; set; }
+    public int TotalCommentCount { get; set; }
+    public IEnumerable<ForumFlair> Flairs { get; set; } = [];
     public List<ForumCommentViewModel> Comments { get; set; } = [];
     public AddCommentViewModel NewComment { get; set; } = new();
 }
@@ -68,6 +70,7 @@ public class ForumCommentViewModel
     public int VoteScore { get; set; }
     public int? UserVote { get; set; }
     public int? ParentCommentId { get; set; }
+ 
     public bool IsDeleted { get; set; }
     public bool CanEdit { get; set; }
     public DateTime? UpdatedAt { get; set; }
