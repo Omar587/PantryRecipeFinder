@@ -4,6 +4,7 @@ using RecipeFinder.Data;
 using RecipeFinder.Models;
 using RecipeFinder.Services;
 using RecipeFinder.Repository;
+using RecipeFinder.Seeders;
 using RecipeFinder.Services.Forum;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,7 +47,7 @@ builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 
-// Seed database
+//-- RECIPE SEEDER --------------------------
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -54,6 +55,11 @@ using (var scope = app.Services.CreateScope())
     await RecipeSeeder.SeedRecipes(context);
 }
 
+// ── Forum seeder ──────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    await ForumSeeder.SeedAsync(scope.ServiceProvider);
+}
 
 
 using (var scope = app.Services.CreateScope())
