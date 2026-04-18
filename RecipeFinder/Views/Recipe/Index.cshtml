@@ -928,7 +928,9 @@
                             _ => "badge-medium"
                         };
 
-                        <article class="recipe-card" onclick="window.location='@Url.Action("Details", "Recipe", new { id = recipe.Id })'">
+                        <article class="recipe-card"
+                                 data-name="@recipe.Name.ToLower()"
+                                 onclick="window.location='@Url.Action("Details", "Recipe", new { id = recipe.Id })'">
                             <div class="card-image-wrap">
                                 <img 
                                     src="@recipe.ImageUrl" 

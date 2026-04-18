@@ -24,6 +24,7 @@ public class RecipeController : Controller
     // GET: /Recipe
     public IActionResult Index(
         int page = 1,
+        string? search = null,
         string? cuisine = null,
         string? difficulty = null,
         double? minRating = null,
@@ -34,6 +35,14 @@ public class RecipeController : Controller
         RecipeService recipeService = new RecipeService(_context);
     
         var query = recipeService.GetAll();
+        
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.ToLower();
+
+            query = query.Where(r =>
+                r.Name.ToLower().Contains(search));
+        }
 
         // Apply filters
         if (!string.IsNullOrEmpty(cuisine) && Enum.TryParse<Cuisine>(cuisine, out var cuisineEnum))
@@ -75,6 +84,7 @@ public class RecipeController : Controller
 
         var totalRecipes = query.Count(); 
         var recipes = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        
 
         // Calculate total pages dynamically
         ViewBag.CurrentPage = page;
