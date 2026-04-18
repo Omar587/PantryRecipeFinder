@@ -88,7 +88,7 @@ public class RecipeSeeder
             return;
         }
 
-        string filePath = "Data/instructions.csv";
+        string filePath = "Data/recipe_instructions.csv";
 
         StreamReader fileReader = new StreamReader(filePath);
         CsvReader csvReader = new CsvReader(fileReader, CultureInfo.InvariantCulture);

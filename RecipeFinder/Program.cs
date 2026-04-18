@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RecipeFinder.Data;
@@ -62,10 +63,17 @@ using (var scope = app.Services.CreateScope())
     await ForumSeeder.SeedAsync(scope.ServiceProvider);
 }
 
-// Instruction seeder ==========================================
+// Instruction seeder 
 
-
-
+// ── Forum seeder ──────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    
+    var services = scope.ServiceProvider;
+    RecipeSeeder recipeSeeder = new RecipeSeeder();
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    recipeSeeder.SeedInstructions(context);
+}
 
 
 using (var scope = app.Services.CreateScope())
@@ -73,6 +81,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     RecipeService recipeService = new RecipeService(context);
     Console.WriteLine(recipeService.GetById(34).Name);
+    
     
     recipeService.TestIngridents();
     
