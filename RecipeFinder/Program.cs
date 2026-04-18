@@ -55,11 +55,16 @@ using (var scope = app.Services.CreateScope())
     await RecipeSeeder.SeedRecipes(context);
 }
 
+
 // ── Forum seeder ──────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     await ForumSeeder.SeedAsync(scope.ServiceProvider);
 }
+
+// Instruction seeder ==========================================
+
+
 
 
 

@@ -509,61 +509,51 @@ public static class ForumSeeder
             },
         };
 
-        // ── 4. Generate posts and comments ────────────────────────────────
-        var rand    = new Random(42); // fixed seed for reproducibility
-        var allPost = new List<ForumPost>();
-        int postId  = 1;
-
-        // Build pool of posts from templates
+      // ── 4. Generate posts and comments ────────────────────────────────
+        var rand     = new Random(42);
         var postPool = new List<(string FlairName, string Title, string Body)>();
 
         foreach (var (flairName, posts) in postTemplates)
-        {
             foreach (var (title, body) in posts)
-            {
                 postPool.Add((flairName, title, body));
-            }
-        }
 
-        // Shuffle and take 300
         postPool = postPool.OrderBy(_ => rand.Next()).ToList();
         var targetPosts = postPool.Take(300).ToList();
-
         var now = DateTime.UtcNow;
 
         foreach (var (flairName, title, body) in targetPosts)
         {
             var flair    = flairs.FirstOrDefault(f => f.Name.Contains(flairName.Split(' ')[0]));
             var author   = customers[rand.Next(customers.Count)];
-            var daysAgo  = rand.Next(1, 180);
-            var hoursAgo = rand.Next(0, 24);
-            var postDate = now.AddDays(-daysAgo).AddHours(-hoursAgo);
+            var postDate = now.AddDays(-rand.Next(1, 180)).AddHours(-rand.Next(0, 24));
 
+            // ── Save post first so it gets a real ID ──────────────────────
             var post = new ForumPost
             {
-                Title       = title,
-                Body        = body,
-                CustomerId  = author.Id,
+                Title        = title,
+                Body         = body,
+                CustomerId   = author.Id,
                 ForumFlairId = flair?.Id,
-                CreatedAt   = postDate,
-                IsDeleted   = false,
-                Comments    = new List<ForumComment>()
+                CreatedAt    = postDate,
+                IsDeleted    = false,
             };
+            await db.ForumPosts.AddAsync(post);
+            await db.SaveChangesAsync(); // post.Id is now valid
 
-            // Add votes to post
-            var voters    = customers.OrderBy(_ => rand.Next()).Take(rand.Next(2, 12)).ToList();
-            var postVotes = new List<ForumPostVote>();
-            foreach (var voter in voters)
+            // ── Post votes ────────────────────────────────────────────────
+            var postVoters = customers.OrderBy(_ => rand.Next()).Take(rand.Next(2, 12)).ToList();
+            foreach (var voter in postVoters)
             {
-                postVotes.Add(new ForumPostVote
+                await db.ForumPostVotes.AddAsync(new ForumPostVote
                 {
-                    CustomerId = voter.Id,
-                    Value      = rand.Next(0, 5) > 0 ? 1 : -1
+                    CustomerId  = voter.Id,
+                    ForumPostId = post.Id,
+                    Value       = rand.Next(0, 5) > 0 ? 1 : -1
                 });
             }
-            post.Votes = postVotes;
+            await db.SaveChangesAsync();
 
-            // Add comments (2-6 per post)
+            // ── Comments ──────────────────────────────────────────────────
             var commentSet  = commentSets[rand.Next(commentSets.Count)];
             var numComments = rand.Next(2, 6);
 
@@ -573,28 +563,32 @@ public static class ForumSeeder
                 var commenter   = customers[rand.Next(customers.Count)];
                 var commentDate = postDate.AddHours(rand.Next(1, 48));
 
+                // ── Save comment so it gets a real ID before adding replies
                 var comment = new ForumComment
                 {
                     Body        = commentBody,
                     CustomerId  = commenter.Id,
+                    ForumPostId = post.Id,
                     CreatedAt   = commentDate,
                     IsDeleted   = false,
-                    Votes       = new List<ForumCommentVote>(),
-                    Replies     = new List<ForumComment>()
                 };
+                await db.ForumComments.AddAsync(comment);
+                await db.SaveChangesAsync(); // comment.Id is now valid
 
-                // Comment votes
+                // ── Comment votes ─────────────────────────────────────────
                 var commentVoters = customers.OrderBy(_ => rand.Next()).Take(rand.Next(1, 6)).ToList();
                 foreach (var voter in commentVoters)
                 {
-                    comment.Votes.Add(new ForumCommentVote
+                    await db.ForumCommentVotes.AddAsync(new ForumCommentVote
                     {
-                        CustomerId = voter.Id,
-                        Value      = rand.Next(0, 4) > 0 ? 1 : -1
+                        CustomerId      = voter.Id,
+                        ForumCommentId  = comment.Id,
+                        Value           = rand.Next(0, 4) > 0 ? 1 : -1
                     });
                 }
+                await db.SaveChangesAsync();
 
-                // Add replies
+                // ── Replies ───────────────────────────────────────────────
                 if (replies.Any())
                 {
                     int replyCount = rand.Next(1, replies.Count + 1);
@@ -603,27 +597,23 @@ public static class ForumSeeder
                         var replier   = customers[rand.Next(customers.Count)];
                         var replyDate = commentDate.AddHours(rand.Next(1, 24));
 
-                        comment.Replies.Add(new ForumComment
+                        await db.ForumComments.AddAsync(new ForumComment
                         {
-                            Body        = replies[r],
-                            CustomerId  = replier.Id,
-                            CreatedAt   = replyDate,
-                            IsDeleted   = false,
-                            Votes       = new List<ForumCommentVote>(),
-                            Replies     = new List<ForumComment>()
+                            Body            = replies[r],
+                            CustomerId      = replier.Id,
+                            ForumPostId     = post.Id,
+                            ParentCommentId = comment.Id, // valid now
+                            CreatedAt       = replyDate,
+                            IsDeleted       = false,
                         });
                     }
+                    await db.SaveChangesAsync();
                 }
-
-                post.Comments.Add(comment);
             }
-
-            allPost.Add(post);
         }
 
-        await db.ForumPosts.AddRangeAsync(allPost);
-        await db.SaveChangesAsync();
+        Console.WriteLine($"✅ Forum seeded with {targetPosts.Count} posts across {flairs.Count} flairs with {customers.Count} community members.");
+    
 
-        Console.WriteLine($"✅ Forum seeded: {allPost.Count} posts across {flairs.Count} flairs with {customers.Count} community members.");
     }
 }
