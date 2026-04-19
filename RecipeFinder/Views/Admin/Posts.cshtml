@@ -1,0 +1,424 @@
+@model RecipeFinder.Controllers.AdminPostsViewModel
+@{
+    ViewData["Title"] = "Post Moderation";
+}
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body, .container, main, .pb-5, .mt-4 {
+    background: #f9f5ef !important;
+}
+
+.admin-shell {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 5rem;
+}
+
+/* ─── HEADER ─── */
+.admin-header {
+    background: linear-gradient(135deg, #2a1f14 0%, #3d2b1a 100%);
+    border-radius: 16px;
+    padding: 2rem 2.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    box-shadow: 0 4px 20px rgba(42,31,20,0.2);
+}
+
+.admin-header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fdf6ee;
+    letter-spacing: -0.02em;
+}
+
+.admin-header-sub {
+    font-size: 0.8rem;
+    color: rgba(253,246,238,0.5);
+    margin-top: 0.25rem;
+}
+
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    background: #e85d26;
+    color: white;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(232,93,38,0.4);
+}
+
+/* ─── ALERTS ─── */
+.alert-success {
+    padding: 0.85rem 1.25rem;
+    background: rgba(45,106,79,0.1);
+    border: 1px solid rgba(45,106,79,0.25);
+    border-radius: 10px;
+    color: #2d6a4f;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* ─── SECTION ─── */
+.admin-section {
+    margin-bottom: 2.5rem;
+}
+
+.section-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #7a6550;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(180,145,100,0.2);
+}
+
+.section-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    background: rgba(180,145,100,0.15);
+    color: #a8927a;
+    border-radius: 100px;
+}
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+    background: #fdf8f2;
+    border-radius: 12px;
+    border: 1px solid rgba(180,145,100,0.18);
+    padding: 2.5rem;
+    text-align: center;
+    color: #c4b09a;
+    font-size: 0.88rem;
+}
+
+.empty-icon { font-size: 2rem; display: block; margin-bottom: 0.75rem; opacity: 0.5; }
+
+/* ─── POST CARD ─── */
+.post-card {
+    background: #fdf8f2;
+    border-radius: 14px;
+    border: 1px solid rgba(180,145,100,0.2);
+    box-shadow: 0 1px 3px rgba(100,70,30,0.06);
+    overflow: hidden;
+    margin-bottom: 0.85rem;
+    transition: box-shadow 0.2s;
+}
+
+.post-card:hover {
+    box-shadow: 0 4px 16px rgba(100,70,30,0.1);
+}
+
+.post-card-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.post-author {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #2a1f14;
+}
+
+.post-time {
+    font-size: 0.72rem;
+    color: #a8927a;
+}
+
+.post-flair {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.5rem;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: rgba(232,93,38,0.1);
+    color: #e85d26;
+}
+
+.post-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a1208;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+.post-preview {
+    font-size: 0.85rem;
+    color: #6b5740;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ─── ACTION BAR ─── */
+.post-actions {
+    padding: 0.75rem 1.5rem;
+    background: #f5ede0;
+    border-top: 1px solid rgba(180,145,100,0.16);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.btn-approve {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem;
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(45,106,79,0.25);
+}
+
+.btn-approve:hover { background: #245a41; transform: translateY(-1px); }
+
+.btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.1rem;
+    background: transparent;
+    color: #c0392b;
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-reject:hover { background: rgba(192,57,43,0.07); border-color: #c0392b; }
+
+.btn-revoke {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #a8927a;
+    border: 1px solid rgba(180,145,100,0.3);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-left: auto;
+}
+
+.btn-revoke:hover { border-color: #6b5740; color: #2a1f14; }
+
+.btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #6b5740;
+    border: 1px solid rgba(180,145,100,0.3);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.btn-view:hover { border-color: #6b5740; color: #2a1f14; text-decoration: none; }
+
+.approved-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #2d6a4f;
+}
+
+.approved-dot::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #2d6a4f;
+    flex-shrink: 0;
+}
+
+@@media (max-width: 600px) {
+    .admin-shell { padding: 1rem 0.75rem 4rem; }
+    .admin-header { padding: 1.25rem; flex-direction: column; align-items: flex-start; }
+    .post-actions { flex-wrap: wrap; }
+}
+</style>
+
+<div class="admin-shell">
+
+    <div class="admin-header">
+        <div>
+            <div class="admin-header-title">Post Moderation</div>
+            <div class="admin-header-sub">Review and approve community posts before they go live</div>
+        </div>
+        @if (Model.PendingPosts.Any())
+        {
+            <span class="admin-badge">@Model.PendingPosts.Count pending</span>
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert-success">✓ @TempData["Success"]</div>
+    }
+
+    <!-- ── PENDING POSTS ── -->
+    <div class="admin-section">
+        <div class="section-title">
+            Pending Approval
+            <span class="section-count">@Model.PendingPosts.Count</span>
+        </div>
+
+        @if (!Model.PendingPosts.Any())
+        {
+            <div class="empty-state">
+                <span class="empty-icon">✓</span>
+                All caught up — no posts waiting for approval.
+            </div>
+        }
+        else
+        {
+            @foreach (var post in Model.PendingPosts)
+            {
+                <div class="post-card">
+                    <div class="post-card-body">
+                        <div class="post-meta-row">
+                            <span class="post-author">@post.AuthorName</span>
+                            <span class="post-time">@TimeAgo(post.CreatedAt)</span>
+                            @if (!string.IsNullOrEmpty(post.FlairName))
+                            {
+                                <span class="post-flair">@post.FlairName</span>
+                            }
+                        </div>
+                        <div class="post-title">@post.Title</div>
+                        <div class="post-preview">@post.Body</div>
+                    </div>
+                    <div class="post-actions">
+                        <form asp-action="Approve" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="postId" value="@post.Id" />
+                            <button type="submit" class="btn-approve">✓ Approve</button>
+                        </form>
+                        <form asp-action="Reject" method="post" style="display:inline"
+                              onsubmit="return confirm('Reject and delete this post?')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="postId" value="@post.Id" />
+                            <button type="submit" class="btn-reject">✕ Reject</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- ── RECENTLY APPROVED ── -->
+    <div class="admin-section">
+        <div class="section-title">
+            Recently Approved
+            <span class="section-count">last 20</span>
+        </div>
+
+        @if (!Model.ApprovedPosts.Any())
+        {
+            <div class="empty-state">
+                <span class="empty-icon">📋</span>
+                No approved posts yet.
+            </div>
+        }
+        else
+        {
+            @foreach (var post in Model.ApprovedPosts)
+            {
+                <div class="post-card">
+                    <div class="post-card-body">
+                        <div class="post-meta-row">
+                            <span class="approved-dot">Live</span>
+                            <span class="post-author">@post.AuthorName</span>
+                            <span class="post-time">@TimeAgo(post.CreatedAt)</span>
+                            @if (!string.IsNullOrEmpty(post.FlairName))
+                            {
+                                <span class="post-flair">@post.FlairName</span>
+                            }
+                        </div>
+                        <div class="post-title">@post.Title</div>
+                        <div class="post-preview">@post.Body</div>
+                    </div>
+                    <div class="post-actions">
+                        <span style="font-size:0.78rem;color:#a8927a;">Approved</span>
+                        <a class="btn-view"
+                           asp-controller="Forum" asp-action="Details" asp-route-id="@post.Id">
+                            View Live →
+                        </a>
+                        <form asp-action="Revoke" method="post" style="display:inline;margin-left:auto;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="postId" value="@post.Id" />
+                            <button type="submit" class="btn-revoke">Revoke</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+</div>
+
+@functions {
+    static string TimeAgo(DateTime dt)
+    {
+        var span = DateTime.UtcNow - dt.ToUniversalTime();
+        if (span.TotalMinutes < 1)  return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes}m ago";
+        if (span.TotalHours   < 24) return $"{(int)span.TotalHours}h ago";
+        if (span.TotalDays    < 7)  return $"{(int)span.TotalDays}d ago";
+        return dt.ToString("MMM d, yyyy");
+    }
+}

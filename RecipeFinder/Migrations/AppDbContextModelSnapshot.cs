@@ -209,6 +209,9 @@ namespace RecipeFinder.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -448,6 +451,9 @@ namespace RecipeFinder.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ForumFlairId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsApproved")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")

@@ -20,7 +20,7 @@ public class ForumPostService : IForumPostService
         string sort, int page, int pageSize, int? flairId, int? currentCustomerId)
     {
         var query = _db.ForumPosts
-            .Where(p => !p.IsDeleted)
+            .Where(p => !p.IsDeleted && p.IsApproved)
             .Include(p => p.Customer)
             .Include(p => p.Flair)
             .Include(p => p.Recipe)

@@ -7,6 +7,7 @@ public class Customer : IdentityUser<int>
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsAdmin { get; set; } = false;
     
     // Navigation properties
     public List<FavoriteRecipe> FavoriteRecipes { get; set; } = new();

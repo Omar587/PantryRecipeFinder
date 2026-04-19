@@ -10,6 +10,7 @@ public class ForumPost
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public bool IsDeleted { get; set; } = false;
+    public bool IsApproved { get; set; } = false;
 
     // Author
     public int CustomerId { get; set; }
